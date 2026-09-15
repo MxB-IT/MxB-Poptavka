@@ -37,7 +37,7 @@ window.MXB_CENIK = {
   rekonstrukceUcetnictviHodina: 1150,
   // Každý koeficient přidává základ × (koeficient − 1); přírůstky se sčítají.
   // Základ je součet cen faktur, pokladních dokladů, plateb kartou a položek na bance.
-  // Skladový koeficient platí pouze při skladové evidenci TYP A.
+  // Skladový koeficient platí pouze při skladové evidenci Typ A.
   koeficientSkladovaEvidence: 1.2,
   // Násobí ceny dokladů při účtování středisek / zakázek.
   koeficientStrediskaZakazky: 1.1,
@@ -47,12 +47,12 @@ window.MXB_CENIK = {
   obratovaPasma: {
     zbozi: [
       { popis: 'do 150 mil. Kč', koeficient: 1 },
-      { popis: '150–500 mil. Kč', koeficient: 1.2 },
+      { popis: '150 – 500 mil. Kč', koeficient: 1.2 },
       { popis: 'nad 500 mil. Kč', koeficient: 1.4 }
     ],
     sluzby: [
       { popis: 'do 50 mil. Kč', koeficient: 1 },
-      { popis: '50–100 mil. Kč', koeficient: 1.2 },
+      { popis: '50 – 100 mil. Kč', koeficient: 1.2 },
       { popis: 'nad 100 mil. Kč', koeficient: 1.4 }
     ],
     nezvoleno: [

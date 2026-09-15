@@ -10,7 +10,7 @@
 .form-trap{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;pointer-events:none}
 .field-help{display:inline-flex;position:relative;margin-left:5px;vertical-align:middle}.help-mark{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1px solid var(--accent);border-radius:50%;color:var(--accent);font-size:12px;cursor:help}.help-tooltip{display:none;position:absolute;right:0;top:24px;width:240px;max-width:70vw;padding:10px;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 12px #0002;font-size:12px;font-weight:400;line-height:1.5;z-index:10}.field-help:hover .help-tooltip,.field-help:focus-within .help-tooltip{display:block}
 .card{background:#fff;border-radius:14px;padding:28px;margin-bottom:18px;box-shadow:0 2px 12px #0000000d}
-h1{margin:0;color:var(--accent);font-size:28px}.brand{font-size:13px;color:#777;margin:5px 0 24px}
+h1{margin:0;color:var(--accent);font-size:28px}.header-logo{display:block;width:140px;max-width:45vw;height:auto}.brand{font-size:13px;color:#777;margin:24px 0 24px}
 h2{font-size:16px;margin:0 0 18px}.intro{color:#555;line-height:1.5}
 .progress{height:8px;background:#e8e4e4;border-radius:8px;overflow:hidden;margin:18px 0}.bar{height:100%;background:var(--accent);width:25%;transition:.25s}
 .grid{display:grid;grid-template-columns:1fr 1fr;column-gap:14px;row-gap:8px}.field{margin-bottom:0}.full{grid-column:1/-1}
@@ -36,7 +36,7 @@ button{border:0;border-radius:9px;padding:12px 20px;font-weight:700;font-size:15
 <body>
 <div class="wrap">
   <div class="card">
-    <h1>MxB účto</h1>
+    <img class="header-logo" src="MXB_color_full@2x.png" alt="MxB společně">
     <div class="brand">PORADENSKÁ SKUPINA MxB · Poptávkový formulář</div>
     <div class="progress"><div class="bar" id="bar"></div></div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
@@ -94,7 +94,7 @@ button{border:0;border-radius:9px;padding:12px 20px;font-weight:700;font-size:15
         <div class="section">
           
           <div class="grid">
-            <div class="field"><label for="businessActivity">Převládající předmět podnikatelské činnosti</label><select id="businessActivity" name="Převládající předmět podnikatelské činnosti"><option value="">Vyberte</option><option value="zbozi">Zboží</option><option value="sluzby">Služby</option></select></div>
+            <div class="field"><label for="businessActivity">Hlavní předmět podnikatelské činnosti</label><select id="businessActivity" name="Hlavní předmět podnikatelské činnosti"><option value="">Vyberte</option><option value="zbozi">Nákup a prodej zboží</option><option value="sluzby">Poskytování služeb</option></select></div>
             <div class="field"><label for="turnoverBand">Obrat za poslední zdaňovací období</label><select id="turnoverBand" name="Obrat za poslední zdaňovací období"><option value="">Vyberte</option></select></div>
             <div class="field"><label>Počet přijatých faktur vč. zálohových (za měsíc)</label><input name="Počet přijatých faktur vč. zálohových (za měsíc)" inputmode="numeric"></div>
             <div class="field"><label>Počet vydaných faktur vč. zálohových (za měsíc)</label><input name="Počet vydaných faktur vč. zálohových (za měsíc)" inputmode="numeric"></div>
@@ -131,9 +131,8 @@ button{border:0;border-radius:9px;padding:12px 20px;font-weight:700;font-size:15
             <div class="field"><label>Skladová evidence / účtování zásob</label>
               <select name="Skladová evidence / účtování zásob">
                 <option value="">Vyberte</option>
-                <option value="TYP A">TYP A</option>
-                <option value="TYP B">TYP B</option>
-                <option value="Ne">ne</option>
+                <option value="Typ A">Typ A</option>
+                <option value="Typ B">Typ B</option>
               </select>
             </div>
             <div class="field"><label>Účtujete na střediska / zakázky?</label>
@@ -524,7 +523,7 @@ function calculateEstimate(){
     status.textContent='Parametry DPPO v souboru cenik.js nejsou platné.';
     return;
   }
-  const inventoryCoefficient=form.elements.namedItem('Skladová evidence / účtování zásob').value==='TYP A' ? prices.koeficientSkladovaEvidence : 1;
+  const inventoryCoefficient=form.elements.namedItem('Skladová evidence / účtování zásob').value==='Typ A' ? prices.koeficientSkladovaEvidence : 1;
   const bands=turnoverBands();
   if(!Array.isArray(bands) || !bands.length || bands.some(band=>!band || typeof band.popis!=='string' || typeof band.koeficient!=='number' || !Number.isFinite(band.koeficient) || band.koeficient<=0)){
     status.textContent='Obratová pásma v souboru cenik.js nejsou platná.';
