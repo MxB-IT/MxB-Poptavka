@@ -4,14 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Poptávkový formulář – MxB účto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{font-family:Arial,Helvetica,sans-serif;color:#222;--accent:#8f343b;--light:#f5f1f1;--border:#d7d0d0}
+:root{font-family:'DM Sans',Arial,Helvetica,sans-serif;color:#4F5A6B;--accent:#b34f4c;--light:#f5f1f1;--border:#d7d0d0}
 *{box-sizing:border-box}body{margin:0;background:#f6f6f6}.wrap{max-width:900px;margin:0 auto;padding:28px 16px 50px}
 .form-trap{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;pointer-events:none}
 .field-help{display:inline-flex;position:relative;margin-left:5px;vertical-align:middle}.help-mark{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1px solid var(--accent);border-radius:50%;color:var(--accent);font-size:12px;cursor:help}.help-tooltip{display:none;position:absolute;right:0;top:24px;width:240px;max-width:70vw;padding:10px;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 12px #0002;font-size:12px;font-weight:400;line-height:1.5;z-index:10}.field-help:hover .help-tooltip,.field-help:focus-within .help-tooltip{display:block}
 .card{background:#fff;border-radius:14px;padding:28px;margin-bottom:18px;box-shadow:0 2px 12px #0000000d}
-h1{margin:0;color:var(--accent);font-size:28px}.header-logo{display:block;width:140px;max-width:45vw;height:auto}.brand{font-size:13px;color:#777;margin:24px 0 24px}
-h2{font-size:16px;margin:0 0 18px}.intro{color:#555;line-height:1.5}
+h1{margin:0;color:var(--accent);font-size:28px}.header-brand{display:flex;align-items:flex-start;justify-content:space-between;gap:28px;margin-bottom:24px}.header-logo{display:block;width:140px;max-width:35vw;height:auto;flex:0 0 auto}.brand{font-size:20px;font-weight:700;line-height:1.1;letter-spacing:.04em;color:#4F5A6B;text-align:right;margin:0;padding-top:11px}
+h2{font-size:16px;margin:0 0 18px}.intro{color:#4F5A6B;line-height:1.5}
 .progress{height:8px;background:#e8e4e4;border-radius:8px;overflow:hidden;margin:18px 0}.bar{height:100%;background:var(--accent);width:25%;transition:.25s}
 .grid{display:grid;grid-template-columns:1fr 1fr;column-gap:14px;row-gap:8px}.field{margin-bottom:0}.full{grid-column:1/-1}
 label{display:block;font-size:13px;font-weight:600;margin-bottom:7px}
@@ -21,14 +24,14 @@ textarea{min-height:100px;resize:vertical}.req{color:var(--accent)}
 .check{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--border);padding:12px;border-radius:9px;cursor:pointer;font-weight:400;background:#fff}.check:has(input:checked){font-weight:700;background:var(--accent);color:#fff;border-color:var(--accent)}
 .check:hover{border-color:var(--accent)}.check input{position:absolute;opacity:0;pointer-events:none}
 .section{background:var(--light);border-radius:10px;padding:16px;margin:18px 0}
-.hidden{display:none!important}.hint{font-size:12px;color:#777;margin-top:5px}
+.hidden{display:none!important}.hint{font-size:12px;color:#4F5A6B;margin-top:5px}
 .nav{display:flex;align-items:center;gap:10px;margin-top:30px}.nav .next:last-child{margin-left:auto}
 button{border:0;border-radius:9px;padding:12px 20px;font-weight:700;font-size:15px;cursor:pointer}
-.next{background:var(--accent);color:white}.back{background:#eee;color:#333}.submit{background:#26734d;color:#fff}
+.next{background:var(--accent);color:white}.back{background:#eee;color:#333}.submit{background:#f2c169;color:#4f5a6b}
 .summary{background:#faf8f8;padding:15px;border-radius:9px;line-height:1.6}
 .estimate-table-wrap{overflow-x:auto}.estimate-table{width:100%;border-collapse:collapse;font-size:13px}.estimate-table th,.estimate-table td{padding:12px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}.estimate-table th:first-child,.estimate-table td:first-child{text-align:left;white-space:normal}.estimate-table thead{background:var(--accent);color:#fff}.estimate-table tfoot{font-weight:700;color:var(--accent);font-size:15px}.estimate-table tfoot td{border-bottom:0}.estimate-table tbody{background:#fff}
-.reporting-table{min-width:750px;table-layout:fixed}.reporting-table th,.reporting-table td{white-space:normal;text-align:center;vertical-align:middle;line-height:1.5}.reporting-table td:first-child{font-weight:700}.reporting-table td:last-child{text-align:left}
-@media(max-width:650px){.grid,.service-grid,.choice-grid{grid-template-columns:1fr}.wrap{padding:15px 10px}.card{padding:20px 16px}h1{font-size:24px}}
+.reporting-table{min-width:750px;table-layout:fixed;border-collapse:separate;border-spacing:0}.reporting-table-wrap{border:1px solid var(--border);border-radius:10px;overflow-x:auto}.reporting-table th,.reporting-table td{white-space:normal;text-align:center;vertical-align:middle;line-height:1.5}.reporting-table td:first-child{font-weight:700}.reporting-table td:last-child{text-align:left}
+@media(max-width:650px){.grid,.service-grid,.choice-grid{grid-template-columns:1fr}.wrap{padding:15px 10px}.card{padding:20px 16px}h1{font-size:24px}.header-brand{gap:16px}.brand{font-size:15px}}
 #backStep,#skipStep{padding:9px 14px;font-size:13px;margin:0}.nav .back,.nav .next{padding:9px 14px;font-size:13px}#backStep{background:#eee;color:#333}.grid .field.rowAligned label{min-height:var(--row-label-height,auto)}
 .test-estimate{background:#eef4fa;border:1px solid #c6d7e9}.test-estimate h2,.test-estimate .estimate-table tfoot{color:#365e85}.test-estimate .estimate-table thead{background:#365e85}
 </style>
@@ -36,8 +39,10 @@ button{border:0;border-radius:9px;padding:12px 20px;font-weight:700;font-size:15
 <body>
 <div class="wrap">
   <div class="card">
-    <img class="header-logo" src="MXB_color_full@2x.png" alt="MxB společně">
-    <div class="brand">PORADENSKÁ SKUPINA MxB · Poptávkový formulář</div>
+    <div class="header-brand">
+      <img class="header-logo" src="MXB_color_full@2x.png" alt="MxB společně">
+      <div class="brand">PORADENSKÁ SKUPINA MxB</div>
+    </div>
     <div class="progress"><div class="bar" id="bar"></div></div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
       <button type="button" class="next" id="backStep" onclick="back()">Krok zpět</button>
@@ -101,11 +106,6 @@ button{border:0;border-radius:9px;padding:12px 20px;font-weight:700;font-size:15
             <div class="field"><label>Počet pokladních dokladů (za měsíc)</label><input name="Počet pokladních dokladů (za měsíc)" inputmode="numeric"></div>
             <div class="field"><label>Počet plateb kartou / ostatní závazky (za měsíc)</label><input name="Počet plateb kartou / ostatní závazky (za měsíc)" inputmode="numeric"></div>
             <div class="field"><label for="bankItems">Počet položek na bance (za měsíc) <span class="field-help"><span class="help-mark" tabindex="0" aria-label="Vysvětlení počtu položek na bance" aria-describedby="bankItemsHelp">?</span><span id="bankItemsHelp" class="help-tooltip" role="tooltip">Počet všech položek (příjmy i výdaje) na všech bankovních účtech</span></span></label><input id="bankItems" name="Počet položek na bance (za měsíc)" type="number" min="0" step="1" inputmode="numeric"></div>
-          </div>
-        </div>
-
-        <div class="section">
-          <div class="grid">
             <div class="field"><label>Plátce DPH</label>
               <select name="Plátce DPH">
                 <option value="">Vyberte</option>
@@ -422,7 +422,7 @@ function buildReportingPrices(){
   heading.textContent='Ceny Reporting.cz';
   container.appendChild(heading);
   const wrap=document.createElement('div');
-  wrap.className='estimate-table-wrap';
+  wrap.className='estimate-table-wrap reporting-table-wrap';
   const table=document.createElement('table');
   table.className='estimate-table reporting-table';
   const thead=document.createElement('thead');
