@@ -33,7 +33,7 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
 .reporting-table{min-width:750px;table-layout:fixed;border-collapse:separate;border-spacing:0}.reporting-table-wrap{border:1px solid var(--border);border-radius:10px;overflow-x:auto}.reporting-table th,.reporting-table td{white-space:normal;text-align:center;vertical-align:middle;line-height:1.5}.reporting-table td:first-child{font-weight:700}.reporting-table td:last-child{text-align:left}
 @media(max-width:650px){.grid,.service-grid,.choice-grid{grid-template-columns:1fr}.wrap{padding:15px 10px}.card{padding:20px 16px}h1{font-size:24px}.header-brand{gap:16px}.brand{font-size:15px}}
 #backStep,#skipStep{padding:9px 14px;font-size:13px;margin:0}.nav .back,.nav .next{padding:9px 14px;font-size:13px}#backStep{background:#eee;color:#4F5A6B}.grid .field.rowAligned label{min-height:var(--row-label-height,auto)}
-.test-estimate{background:#eef4fa;border:1px solid #c6d7e9}.test-estimate h2,.test-estimate .estimate-table tfoot{color:#365e85}.test-estimate .estimate-table thead{background:#365e85}#reportingPrices{display:none!important}
+.test-estimate{background:#eef4fa;border:1px solid #c6d7e9}.test-estimate h2,.test-estimate .estimate-table tfoot{color:#365e85}.test-estimate .estimate-table thead{background:#365e85}#reportingPrices{display:none!important}#estimateNotices .intro{font-size:14px}
 </style>
 </head>
 <body>
@@ -193,14 +193,17 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
      
       <div class="summary hidden" id="summary" aria-hidden="true"></div>
       <div id="estimate" class="section hidden" aria-live="polite">
-        <h2>Orientační měsíční cena</h2>
-        <div class="estimate-table-wrap"><table class="estimate-table">
-          <tbody id="estimateRows"></tbody>
-          <tfoot><tr><td>Celkem za měsíc</td><td id="estimateTotal"></td></tr></tfoot>
-        </table></div>
-        <div id="estimateNotices"></div>
-        <p class="hint">Jedná se o nezávaznou kalkulaci na základě Vámi zadaných hodnot. Uvedené ceny jsou bez DPH.</p>
-        <p id="estimateStatus" class="hint" role="status"></p>
+          <h2>Orientační měsíční cena</h2>
+          <div class="estimate-table-wrap">
+              <table class="estimate-table">
+                  <tbody id="estimateRows"></tbody>
+                  <tfoot><tr><td>Celkem za měsíc</td><td id="estimateTotal"></td></tr></tfoot>
+              </table>
+          </div>
+
+          <p class="hint">Jedná se o nezávaznou kalkulaci na základě Vámi zadaných hodnot. Uvedené ceny jsou bez DPH.</p>
+          <p id="estimateStatus" class="hint" role="status"></p>
+          <div id="estimateNotices"></div>
       </div>
       <div id="hourlyRates" class="section hidden" aria-live="polite"></div>
       <div id="testEstimate" class="section test-estimate hidden" aria-live="polite">
@@ -461,9 +464,9 @@ function buildHourlyRates(){
   if(!monthly) document.getElementById('estimate').classList.add('hidden');
   const notices=[];
   const foreignVatAgenda=form.elements.namedItem('Plátce DPH').value==='Ano' && (form.elements.namedItem('Plátce DPH v zahraničí').value==='Ano' || form.elements.namedItem('Podání OSS').value==='Ano');
-  if(has('dap')) notices.push('Odměna za zpracování daňového přiznání se odvíjí od jeho obsahové a časové náročnosti a je účtována v sazbě daňového poradce.');
-  if(has('intra')) notices.push('Odměna za zpracování hlášení Intrastat se odvíjí od jeho obsahové a časové náročnosti a je účtována v sazbě senior účetní.');
-  if(foreignVatAgenda) notices.push('Služby spojené s agendou DPH pro zahraniční plátce a podání OSS jsou účtovány v sazbě senior účetní.');
+  if(has('dap')) notices.push('Odměna za zpracování daňového přiznání se odvíjí od jeho obsahové a časové náročnosti a je účtována v hodinové sazbě daňového poradce.');
+  if(has('intra')) notices.push('Odměna za zpracování hlášení Intrastat se odvíjí od jeho obsahové a časové náročnosti a je účtována v hodinové sazbě senior účetní.');
+  if(foreignVatAgenda) notices.push('Služby spojené s agendou DPH pro zahraniční plátce a podání OSS jsou účtovány v hodinové sazbě senior účetní.');
   const noticesContainer=document.getElementById('estimateNotices');
   noticesContainer.replaceChildren();
   notices.forEach(message=>{
