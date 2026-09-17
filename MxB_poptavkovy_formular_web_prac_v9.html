@@ -29,7 +29,7 @@ textarea{min-height:100px;resize:vertical}.req{color:var(--accent)}
 button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
 .next{background:var(--accent);color:white}.back{background:#eee;color:#4F5A6B}.submit{background:#f2c169;color:#4f5a6b}
 .summary{background:var(--light);padding:15px;border-radius:9px;line-height:1.6}
-.estimate-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}.estimate-table{width:100%;border-collapse:collapse;font-size:13px}.estimate-table th,.estimate-table td{padding:12px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}.estimate-table th:first-child,.estimate-table td:first-child{text-align:left;white-space:normal}.estimate-table thead{background:var(--accent);color:#fff}.estimate-table tfoot{font-weight:700;color:var(--accent);font-size:15px}.estimate-table tfoot td{border-bottom:0}.estimate-table tbody{background:#fff}
+.estimate-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}.estimate-table{width:100%;border-collapse:collapse;font-size:13px}.estimate-table th,.estimate-table td{padding:12px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}.estimate-table th:first-child,.estimate-table td:first-child{text-align:left;white-space:normal}.estimate-table thead{background:var(--accent);color:#fff}.estimate-table tfoot{font-weight:700;color:var(--accent);font-size:15px}.estimate-table tfoot td{border-bottom:0}.estimate-table tbody{background:#fff}#estimate .estimate-table tfoot{background:var(--accent);color:#fff}#estimate .estimate-table tfoot td{color:#fff}
 .reporting-table{min-width:750px;table-layout:fixed;border-collapse:separate;border-spacing:0}.reporting-table-wrap{border:1px solid var(--border);border-radius:10px;overflow-x:auto}.reporting-table th,.reporting-table td{white-space:normal;text-align:center;vertical-align:middle;line-height:1.5}.reporting-table td:first-child{font-weight:700}.reporting-table td:last-child{text-align:left}
 @media(max-width:650px){.grid,.service-grid,.choice-grid{grid-template-columns:1fr}.wrap{padding:15px 10px}.card{padding:20px 16px}h1{font-size:24px}.header-brand{gap:16px}.brand{font-size:15px}}
 #backStep,#skipStep{padding:9px 14px;font-size:13px;margin:0}.nav .back,.nav .next{padding:9px 14px;font-size:13px}#backStep{background:#eee;color:#4F5A6B}.grid .field.rowAligned label{min-height:var(--row-label-height,auto)}
@@ -174,10 +174,6 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
         </div>
       </div>
 
-      <div class="section">
-        <h2>Specifika a požadavky na spolupráci</h2>
-        <textarea name="Specifika a požadavky na spolupráci"></textarea>
-      </div>
       <div class="nav"><button type="button" class="back" onclick="back()">Zpět</button><button type="button" class="next" onclick="clearCurrentStep()">Vymazat</button><button type="button" class="next" onclick="next()">Spočítat poptávku</button></div>
     </section>
     <section class="step hidden" data-step="4">
@@ -198,15 +194,15 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
       <div class="summary hidden" id="summary" aria-hidden="true"></div>
       <div id="estimate" class="section hidden" aria-live="polite">
         <h2>Orientační měsíční cena</h2>
-        <p class="hint">Jedná se o nezávaznou kalkulaci na základě Vámi zadaných dat.</p>
         <div class="estimate-table-wrap"><table class="estimate-table">
-          <thead><tr><th scope="col">Položka</th><th scope="col">Celkem</th></tr></thead>
           <tbody id="estimateRows"></tbody>
           <tfoot><tr><td>Celkem za měsíc</td><td id="estimateTotal"></td></tr></tfoot>
         </table></div>
-        <p class="hint">Uvedené ceny jsou bez DPH.</p>
+        <div id="estimateNotices"></div>
+        <p class="hint">Jedná se o nezávaznou kalkulaci na základě Vámi zadaných hodnot. Uvedené ceny jsou bez DPH.</p>
         <p id="estimateStatus" class="hint" role="status"></p>
       </div>
+      <div id="hourlyRates" class="section hidden" aria-live="polite"></div>
       <div id="testEstimate" class="section test-estimate hidden" aria-live="polite">
         <h2>TESTOVACÍ – podrobný rozpis ceny pro testování !POUZE PRO TESTOVÁNÍ!</h2>
         <p class="hint">TESTOVACÍ rozpis v Kč. Každý přírůstek se počítá pouze ze součtu základních cen pěti účetních položek. Tento rozpis se neposílá e-mailem.</p>
@@ -218,7 +214,10 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
         <p id="testEstimateStatus" class="hint"></p>
       </div>
       <div id="reportingPrices" class="section hidden" aria-live="polite"></div>
-      <div id="hourlyRates" class="section hidden" aria-live="polite"></div>
+      <div class="section">
+        <h2>Specifika a požadavky na spolupráci</h2>
+        <textarea name="Specifika a požadavky na spolupráci"></textarea>
+      </div>
       <div class="nav"><button type="button" class="back" onclick="back()">Zpět</button><button type="button" class="submit" onclick="submitDemo()">Odeslat poptávku</button></div>
       <p id="result" class="hint"></p>
     </section>
@@ -465,6 +464,14 @@ function buildHourlyRates(){
   if(has('dap')) notices.push('Odměna za zpracování daňového přiznání se odvíjí od jeho obsahové a časové náročnosti a je účtována v sazbě daňového poradce.');
   if(has('intra')) notices.push('Odměna za zpracování hlášení Intrastat se odvíjí od jeho obsahové a časové náročnosti a je účtována v sazbě senior účetní.');
   if(foreignVatAgenda) notices.push('Služby spojené s agendou DPH pro zahraniční plátce a podání OSS jsou účtovány v sazbě senior účetní.');
+  const noticesContainer=document.getElementById('estimateNotices');
+  noticesContainer.replaceChildren();
+  notices.forEach(message=>{
+    const paragraph=document.createElement('p');
+    paragraph.className='intro';
+    paragraph.textContent=message;
+    noticesContainer.appendChild(paragraph);
+  });
   const services=[
     ['dan','Daňové poradenství','danovePoradenstviHodina'],
     ['senior','Senior účetní','seniorUcetniHodina'],
@@ -475,8 +482,8 @@ function buildHourlyRates(){
     ['rekonstrukce','Rekonstrukce účetnictví','rekonstrukceUcetnictviHodina'],
     ['it','IT podpora','itPodporaHodina']
   ];
-  container.classList.toggle('hidden',!services.length && !notices.length);
-  if(!services.length && !notices.length) return;
+  container.classList.toggle('hidden',!services.length);
+  if(!services.length) return;
   const prices=window.MXB_CENIK;
   const valid=value=>typeof value==='number' && Number.isFinite(value) && value>=0;
   if(!prices || services.some(([, ,key])=>!valid(prices[key])) || (has('dap') && !valid(prices.danovePoradenstviHodina)) || ((has('intra') || foreignVatAgenda) && !valid(prices.seniorUcetniHodina))){
@@ -484,21 +491,36 @@ function buildHourlyRates(){
     return;
   }
   const heading=document.createElement('h2');
-  heading.textContent='Hodinové sazby';
+  heading.textContent='Ceník našich služeb';
   container.appendChild(heading);
-  notices.forEach(message=>{
-    const paragraph=document.createElement('p');
-    paragraph.className='intro';
-    paragraph.textContent=message;
-    container.appendChild(paragraph);
-  });
   const money=new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0});
-  services.forEach(([,label,key])=>{
-    const paragraph=document.createElement('p');
-    paragraph.className='intro';
-    paragraph.textContent=`${label}: ${money.format(prices[key])}.`;
-    container.appendChild(paragraph);
+  const wrap=document.createElement('div');
+  wrap.className='estimate-table-wrap';
+  const table=document.createElement('table');
+  table.className='estimate-table';
+  const thead=document.createElement('thead');
+  const headerRow=document.createElement('tr');
+  ['', 'Hodinová sazba'].forEach(label=>{
+    const cell=document.createElement('th');
+    cell.scope='col';
+    cell.textContent=label;
+    headerRow.appendChild(cell);
   });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+  const tbody=document.createElement('tbody');
+  services.forEach(([,label,key])=>{
+    const row=document.createElement('tr');
+    [label,money.format(prices[key])].forEach(value=>{
+      const cell=document.createElement('td');
+      cell.textContent=value;
+      row.appendChild(cell);
+    });
+    tbody.appendChild(row);
+  });
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  container.appendChild(wrap);
   const note=document.createElement('p');
   note.className='hint';
   note.textContent='Cena těchto služeb závisí na rozsahu práce. Uvedené sazby jsou bez DPH.';
@@ -656,7 +678,8 @@ function calculateEstimate(){
   document.getElementById('testEstimateStatus').textContent=status.textContent;
   document.getElementById('testEstimate').classList.remove('hidden');
 }
-function hideEstimates(){
+function hideEstimates(event){
+  if(event?.target?.name==='Specifika a požadavky na spolupráci') return;
   ['estimate','testEstimate'].forEach(id=>document.getElementById(id).classList.add('hidden'));
 }
 form.addEventListener('input',hideEstimates);
