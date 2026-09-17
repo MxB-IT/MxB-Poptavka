@@ -198,7 +198,7 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
       <div class="summary hidden" id="summary" aria-hidden="true"></div>
       <div id="estimate" class="section hidden" aria-live="polite">
         <h2>Orientační měsíční cena</h2>
-        <p class="hint">Ukázkový výpočet s ilustračními sazbami, nikoli závazná nabídka. Nevyplněné počty se počítají jako 0.</p>
+        <p class="hint">Jedná se o nezávaznou kalkulaci na základě Vámi zadaných dat.</p>
         <div class="estimate-table-wrap"><table class="estimate-table">
           <thead><tr><th scope="col">Položka</th><th scope="col">Celkem</th></tr></thead>
           <tbody id="estimateRows"></tbody>
@@ -467,14 +467,14 @@ function buildHourlyRates(){
   if(foreignVatAgenda) notices.push('Služby spojené s agendou DPH pro zahraniční plátce a podání OSS jsou účtovány v sazbě senior účetní.');
   const services=[
     ['dan','Daňové poradenství','danovePoradenstviHodina'],
+    ['senior','Senior účetní','seniorUcetniHodina'],
     ['audit','Finanční audit','financniAuditHodina'],
     ['eko','Ekonomické poradenství','ekonomickePoradenstviHodina'],
     ['prav','Právní poradenství','pravniPoradenstviHodina'],
     ['prav','Služby advokáta','sluzbyAdvokataHodina'],
-    ['rekonstrukce','Rekonstrukce účetnictví','rekonstrukceUcetnictviHodina']
-  ].filter(([service])=>has(service));
-  if(has('intra') || foreignVatAgenda) services.unshift(['senior','Senior účetní','seniorUcetniHodina']);
-  services.push(['it','IT podpora','itPodporaHodina']);
+    ['rekonstrukce','Rekonstrukce účetnictví','rekonstrukceUcetnictviHodina'],
+    ['it','IT podpora','itPodporaHodina']
+  ];
   container.classList.toggle('hidden',!services.length && !notices.length);
   if(!services.length && !notices.length) return;
   const prices=window.MXB_CENIK;
@@ -484,7 +484,7 @@ function buildHourlyRates(){
     return;
   }
   const heading=document.createElement('h2');
-  heading.textContent='Hodinové sazby poptávaných služeb';
+  heading.textContent='Hodinové sazby';
   container.appendChild(heading);
   notices.forEach(message=>{
     const paragraph=document.createElement('p');
@@ -501,7 +501,7 @@ function buildHourlyRates(){
   });
   const note=document.createElement('p');
   note.className='hint';
-  note.textContent='Cena těchto služeb závisí na rozsahu práce a není zahrnuta v měsíčním součtu. Uvedené sazby jsou bez DPH.';
+  note.textContent='Cena těchto služeb závisí na rozsahu práce. Uvedené sazby jsou bez DPH.';
   container.appendChild(note);
 }
 
