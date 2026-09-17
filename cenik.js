@@ -18,6 +18,8 @@ window.MXB_CENIK = {
   generalniPlnaMocFu: 750,
   // Hodinové sazby v Kč bez DPH; minimum je za celé daňové přiznání.
   danovePoradenstviHodina: 2500,
+  seniorUcetniHodina: 900,
+  itPodporaHodina: 1500,
   danovePriznaniHodina: 900,
   danovePriznaniMinimum: 2500,
   financniAuditHodina: 2000,
