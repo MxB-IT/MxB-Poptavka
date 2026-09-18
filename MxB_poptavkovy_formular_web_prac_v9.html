@@ -233,7 +233,7 @@ let step=1;
 const form=document.getElementById('form');
 
 function updateAccountingRequirements(){
-  const optional=new Set(['Skladová evidence / účtování zásob','Účtujete na střediska / zakázky?','Sledujete detailní analytiku?']);
+  const optional=new Set(['Používaný účetní SW','Skladová evidence / účtování zásob','Účtujete na střediska / zakázky?','Sledujete detailní analytiku?']);
   document.querySelectorAll('.step[data-step="3"] input, .step[data-step="3"] select, .step[data-step="4"] input, .step[data-step="4"] select').forEach(field=>{
     if(!optional.has(field.name)) field.required=true;
   });
