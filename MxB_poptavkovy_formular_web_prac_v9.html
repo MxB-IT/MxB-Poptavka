@@ -457,12 +457,23 @@ function buildHourlyRates(){
   container.replaceChildren();
   const monthly=has('ucto') || has('mzdy');
   if(!monthly) document.getElementById('estimate').classList.add('hidden');
+  const hourlyServiceKeys=['dan','dap','audit','eko','prav','intra','rekonstrukce','rekonstrukceMzdy'];
+  const selectedHourlyCount=hourlyServiceKeys.filter(has).length;
+  if(selectedHourlyCount){
+    const sentence=selectedHourlyCount===1
+      ? 'Odměna za Vámi vybranou službu se odvíjí od její obsahové a časové náročnosti a je účtována v hodinové sazbě dle následujícího ceníku.'
+      : 'Odměna za Vámi vybrané služby se odvíjí od jejich obsahové a časové náročnosti a jsou účtovány v hodinové sazbě dle následujícího ceníku.';
+    const intro=document.createElement('p');
+    intro.className='intro';
+    intro.textContent=sentence;
+    container.appendChild(intro);
+  }
   const notices=[];
   const foreignVatAgenda=form.elements.namedItem('Plátce DPH').value==='Ano' && (form.elements.namedItem('Plátce DPH v zahraničí').value==='Ano' || form.elements.namedItem('Podání OSS').value==='Ano');
   if(has('dap')) notices.push('Odměna za zpracování daňového přiznání se odvíjí od jeho obsahové a časové náročnosti a je účtována v hodinové sazbě daňového poradce.');
   if(has('intra')) notices.push('Odměna za zpracování hlášení Intrastat se odvíjí od jeho obsahové a časové náročnosti a je účtována v hodinové sazbě senior účetní.');
   if(foreignVatAgenda) notices.push('Služby spojené s agendou DPH pro zahraniční plátce a podání OSS jsou účtovány v hodinové sazbě senior účetní.');
-  const noticesContainer=document.getElementById('estimateNotices');
+  const noticesContainer=monthly ? document.getElementById('estimateNotices') : container;
   noticesContainer.replaceChildren();
   notices.forEach(message=>{
     const paragraph=document.createElement('p');
