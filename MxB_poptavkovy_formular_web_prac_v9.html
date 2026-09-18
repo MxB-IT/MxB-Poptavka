@@ -18,6 +18,7 @@ h2{font-size:16px;margin:0 0 18px}.intro{color:#4F5A6B;line-height:1.5}
 .progress{height:8px;background:#e8e4e4;border-radius:8px;overflow:hidden;margin:18px 0}.bar{height:100%;background:var(--accent);width:25%;transition:.25s}
 .grid{display:grid;grid-template-columns:1fr 1fr;column-gap:14px;row-gap:8px}.field{margin-bottom:0}.full{grid-column:1/-1}
 label{display:block;font-size:13px;font-weight:600;margin-bottom:7px}
+.required-mark{color:var(--accent);margin-left:4px;font-weight:800}
 input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:13px;background:#fff}
 textarea{min-height:100px;resize:vertical}.req{color:var(--accent)}
 .service-grid,.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -62,12 +63,12 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
       <div class="grid">
         <div class="field"><label>Název společnosti</label><input name="Název společnosti"></div>
         <div class="field"><label>IČO</label>
-          <input id="icoField" name="IČO" inputmode="numeric" pattern="[0-9 ]{6,}">
+          <input id="icoField" name="IČO" inputmode="numeric" pattern="[0-9 ]{6,}" required>
           <button type="button" class="next" style="margin-top:8px;padding:9px 14px;font-size:13px" onclick="loadFromAres()">Načíst název společnosti z ARES</button>
           <div id="aresStatus" class="hint"></div>
         </div>
-        <div class="field" style="margin-top:22px"><label>Kontaktní osoba</label><input name="Kontaktní osoba"></div>
-        <div class="field" style="grid-column:1"><label>E-mail</label><input name="E-mail" type="email"></div>
+        <div class="field" style="margin-top:22px"><label>Kontaktní osoba</label><input name="Kontaktní osoba" required></div>
+        <div class="field" style="grid-column:1"><label>E-mail</label><input name="E-mail" type="email" required></div>
         <div class="field"><label>Telefon</label><input name="Telefon" type="tel"></div>
       </div><div class="nav"><span></span><button type="button" class="next" onclick="next()">Pokračovat</button></div>
     </section>
@@ -86,7 +87,7 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
           <label class="check"><input type="checkbox" name="Ekonomické poradenství" data-service="eko">Ekonomické poradenství</label>
           <label class="check"><input type="checkbox" name="Právní poradenství, služby advokáta" data-service="prav">Právní poradenství, služby advokáta</label>
           <label class="check"><input type="checkbox" name="Zpracování Intrastat" data-service="intra">Zpracování Intrastat</label>
-          <label class="check"><input type="checkbox" name="Rekonstrukce účetnictví" data-service="rekonstrukce">Rekonstrukce účetnictví</label>
+          <label class="check"><input type="checkbox" name="Rekonstrukce účetnictví" data-service="rekonstrukce">Rekonstrukce účetnictví / mzdového účetnictví</label>
       </div>
       <div class="nav"><button type="button" class="back" onclick="back()">Zpět</button><button type="button" class="next" onclick="clearCurrentStep()">Vymazat</button><button type="button" class="next" onclick="next()">Pokračovat</button></div>
     </section>
@@ -193,7 +194,7 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
      
       <div class="summary hidden" id="summary" aria-hidden="true"></div>
       <div id="estimate" class="section hidden" aria-live="polite">
-          <h2>Orientační měsíční cena</h2>
+          <h2>Odhadovaná cena za měsíc</h2>
           <div class="estimate-table-wrap">
               <table class="estimate-table">
                   <tbody id="estimateRows"></tbody>
@@ -201,7 +202,7 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
               </table>
           </div>
 
-          <p class="hint">Jedná se o nezávaznou kalkulaci na základě Vámi zadaných hodnot. Uvedené ceny jsou bez DPH.</p>
+          <p class="hint">Jedná se o nezávaznou kalkulaci na základě Vámi zadaných hodnot. Uvedené částky jsou bez DPH.</p>
           <p id="estimateStatus" class="hint" role="status"></p>
           <div id="estimateNotices"></div>
       </div>
@@ -231,6 +232,31 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
 <script>
 let step=1;
 const form=document.getElementById('form');
+
+function updateAccountingRequirements(){
+  const optional=new Set(['Skladová evidence / účtování zásob','Účtujete na střediska / zakázky?','Sledujete detailní analytiku?']);
+  document.querySelectorAll('.step[data-step="3"] input, .step[data-step="3"] select, .step[data-step="4"] input, .step[data-step="4"] select').forEach(field=>{
+    if(!optional.has(field.name)) field.required=true;
+  });
+  const dphSelected=document.querySelector('select[name="Plátce DPH"]')?.value==='Ano';
+  document.querySelectorAll('.foreignDphQuestion select,.oddQuestion select').forEach(field=>{field.required=dphSelected});
+  updateRequiredMarkers();
+}
+function updateRequiredMarkers(){
+  document.querySelectorAll('.field').forEach(field=>{
+    const label=field.querySelector('label');
+    const control=field.querySelector('input,select,textarea');
+    if(!label || !control) return;
+    label.querySelector('.required-mark')?.remove();
+    if(control.required){
+      const mark=document.createElement('span');
+      mark.className='required-mark';
+      mark.textContent='*';
+      mark.setAttribute('aria-hidden','true');
+      label.appendChild(mark);
+    }
+  });
+}
 
 function selected(){
   return [...document.querySelectorAll('[data-service]:checked')].map(x=>x.dataset.service);
@@ -265,6 +291,7 @@ function updateDynamic(){
   document.querySelectorAll('.foreignDphQuestion,.oddQuestion').forEach(el=>el.classList.toggle('hidden',!!dphNo || !dph));
   document.querySelectorAll('.foreignDphDependent').forEach(el=>el.classList.toggle('hidden',!dph || !foreignDph));
   document.querySelectorAll('.oddDependent').forEach(el=>el.classList.toggle('hidden',!dph || !odd));
+  updateAccountingRequirements();
   alignGridLabels();
 }
 document.querySelectorAll('[data-service]').forEach(x=>x.addEventListener('change',updateDynamic));
@@ -308,7 +335,12 @@ function alignGridLabels(){
 window.addEventListener('resize',alignGridLabels);
 
 function activeSteps(){
-  return [1,2,3,4,5,6];
+  if(selected().length===0) return [1,2,3,4,5,6];
+  const reconstruction=has('rekonstrukce');
+  const accounting=has('ucto') || reconstruction;
+  const payroll=has('mzdy') || reconstruction;
+  const extraServices=has('ucto') || has('mzdy');
+  return [1,2,...(accounting?[3]:[]),...(payroll?[4]:[]),...(extraServices?[5]:[]),6];
 }
 function moveStep(direction){
   const steps=activeSteps();
@@ -318,9 +350,12 @@ function moveStep(direction){
 function render(){
   const steps=activeSteps();
   const position=steps.indexOf(step)+1;
+  const servicesSelected=selected().length>0;
+  const displayedPosition=servicesSelected ? position : step;
+  const displayedTotal=servicesSelected ? steps.length : 6;
   document.querySelectorAll('.step').forEach(x=>x.classList.toggle('hidden',+x.dataset.step!==step));
-  document.getElementById('bar').style.width=(position/steps.length*100)+'%';
-  document.getElementById('stepLabel').textContent=`Krok ${position} ze ${steps.length}`;
+  document.getElementById('bar').style.width=(displayedPosition/displayedTotal*100)+'%';
+  document.getElementById('stepLabel').textContent=`Krok ${displayedPosition} ze ${displayedTotal}`;
   document.getElementById('backStep').classList.toggle('hidden',position<=1);
   document.getElementById('skipStep').classList.toggle('hidden',position>=steps.length);
   updateDynamic();
@@ -344,8 +379,25 @@ function skipStep(){
 }
 
 function next(){
-  if(step===1 && !form.reportValidity()) return;
+  if(step===1){
+    const firstStep=document.querySelector('.step[data-step="1"]');
+    const invalid=[...firstStep.querySelectorAll('input,select,textarea')].find(field=>!field.checkValidity());
+    if(invalid){
+      invalid.focus();
+      alert(invalid.validity.valueMissing ? `Pole „${invalid.closest('.field')?.querySelector('label')?.textContent?.trim() || invalid.name}“ je povinné.` : `Pole „${invalid.closest('.field')?.querySelector('label')?.textContent?.trim() || invalid.name}“ obsahuje neplatnou hodnotu.`);
+      return;
+    }
+  }
   if(step===2 && selected().length===0){alert('Vyberte prosím alespoň jednu službu.');return}
+  if(step===3 || step===4){
+    const currentStep=document.querySelector(`.step[data-step="${step}"]`);
+    const invalid=[...currentStep.querySelectorAll('input,select,textarea')].find(field=>!field.checkValidity());
+    if(invalid){
+      invalid.focus();
+      alert(invalid.validity.valueMissing ? `Pole „${invalid.closest('.field')?.querySelector('label')?.textContent?.trim() || invalid.name}“ je povinné.` : `Pole „${invalid.closest('.field')?.querySelector('label')?.textContent?.trim() || invalid.name}“ obsahuje neplatnou hodnotu.`);
+      return;
+    }
+  }
   moveStep(1);
 }
 function back(){moveStep(-1)}
@@ -621,7 +673,7 @@ function calculateEstimate(){
   if(has('ucto') && accountingCost>0){
     const row=document.createElement('tr');
     const label=document.createElement('td');
-    label.textContent='Měsíční odměna za zpracované účetnictví';
+    label.textContent='Zpracování finančního účetnictví';
     const amount=document.createElement('td');
     amount.textContent=money.format(roundClient(accountingCost));
     row.append(label,amount);
@@ -686,6 +738,19 @@ form.addEventListener('input',hideEstimates);
 form.addEventListener('change',hideEstimates);
 
 function submitDemo(){
+  const requiredFields=[
+    ['Kontaktní osoba','Kontaktní osoba'],
+    ['IČO','IČO'],
+    ['E-mail','E-mail']
+  ];
+  const missing=requiredFields.find(([name])=>!String(form.elements.namedItem(name)?.value || '').trim());
+  if(missing){
+    step=1;
+    render();
+    window.setTimeout(()=>form.elements.namedItem(missing[0])?.focus(),0);
+    alert(`Pole „${missing[1]}“ je povinné.`);
+    return;
+  }
   // Stejnou kontrolu je nutné provést i na budoucím serverovém endpointu.
   if(form.elements.namedItem('website').value!==''){
     document.getElementById('result').textContent='Poptávku se nepodařilo odeslat. Obnovte prosím stránku a zkuste to znovu.';
