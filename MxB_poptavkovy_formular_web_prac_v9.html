@@ -479,8 +479,6 @@ function buildHourlyRates(){
   }
   const notices=[];
   const foreignVatAgenda=form.elements.namedItem('Plátce DPH').value==='Ano' && (form.elements.namedItem('Plátce DPH v zahraničí').value==='Ano' || form.elements.namedItem('Podání OSS').value==='Ano');
-  if(has('dap')) notices.push('Odměna za zpracování daňového přiznání se odvíjí od jeho obsahové a časové náročnosti a je účtována v hodinové sazbě daňového poradce.');
-  if(has('intra')) notices.push('Odměna za zpracování hlášení Intrastat se odvíjí od jeho obsahové a časové náročnosti a je účtována v hodinové sazbě senior účetní.');
   if(foreignVatAgenda) notices.push('Služby spojené s agendou DPH pro zahraniční plátce a podání OSS jsou účtovány v hodinové sazbě senior účetní.');
   const noticesContainer=monthly ? document.getElementById('estimateNotices') : container;
   if(monthly) noticesContainer.replaceChildren();
