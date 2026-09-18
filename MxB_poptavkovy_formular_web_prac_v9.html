@@ -457,16 +457,25 @@ function buildHourlyRates(){
   container.replaceChildren();
   const monthly=has('ucto') || has('mzdy');
   if(!monthly) document.getElementById('estimate').classList.add('hidden');
-  const hourlyServiceKeys=['dan','dap','audit','eko','prav','intra','rekonstrukce','rekonstrukceMzdy'];
-  const selectedHourlyCount=hourlyServiceKeys.filter(has).length;
+  const hourlyServices=[
+    ['dan','Daňové poradenství'],['dap','Zpracování daňového přiznání'],['audit','Finanční audit'],
+    ['eko','Ekonomické poradenství'],['prav','Právní poradenství'],['intra','Zpracování Intrastat'],
+    ['rekonstrukce','Rekonstrukce účetnictví'],['rekonstrukceMzdy','Rekonstrukce mzdového účetnictví']
+  ];
+  const selectedHourlyServices=hourlyServices.filter(([key])=>has(key)).map(([,label])=>label);
+  const selectedHourlyCount=selectedHourlyServices.length;
   let intro=null;
   if(selectedHourlyCount){
-    const sentence=selectedHourlyCount===1
-      ? 'Odměna za Vámi vybranou službu se odvíjí od její obsahové a časové náročnosti a je účtována v hodinové sazbě dle následujícího ceníku.'
-      : 'Odměna za Vámi vybrané služby se odvíjí od jejich obsahové a časové náročnosti a jsou účtovány v hodinové sazbě dle následujícího ceníku.';
     intro=document.createElement('p');
     intro.className='intro';
-    intro.textContent=sentence;
+    const prefix=selectedHourlyCount===1 ? 'Vámi vybraná služba ' : 'Vámi vybrané služby ';
+    const suffix=selectedHourlyCount===1
+      ? ' je účtována v hodinové sazbě a její výsledná cena se odvíjí od její obsahové a časové náročnosti.'
+      : ' jsou účtovány v hodinové sazbě a jejich výsledná cena se odvíjí od jejich obsahové a časové náročnosti.';
+    intro.append(document.createTextNode(prefix));
+    const serviceNames=document.createElement('strong');
+    serviceNames.textContent=selectedHourlyServices.join(', ');
+    intro.append(serviceNames,document.createTextNode(suffix));
   }
   const notices=[];
   const foreignVatAgenda=form.elements.namedItem('Plátce DPH').value==='Ano' && (form.elements.namedItem('Plátce DPH v zahraničí').value==='Ano' || form.elements.namedItem('Podání OSS').value==='Ano');
