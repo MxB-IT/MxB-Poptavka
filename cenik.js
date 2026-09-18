@@ -29,13 +29,6 @@ window.MXB_CENIK = {
   intrastatHodina: 900,
   // Společná hodinová sazba pro zahraniční DPH a podání OSS.
   zahranicniDphOssHodina: 900,
-  reporting: [
-    { nazev: 'Lokální finanční reporting', mesicniCena: 1000, implementace: 5000, implementaceServer: 5000, hodinovaSazba: 2000, popis: 'Rozvaha, VZZ, cash flow' },
-    { nazev: 'Ageing', mesicniCena: 2000, implementace: 5000, implementaceServer: 5000, hodinovaSazba: 2000, popis: 'Pohledávky a závazky, rozpad na klienta/dodavatele' },
-    { nazev: 'Budgeting & Forecasting', mesicniCena: 3000, implementace: 5000, implementaceServer: 5000, hodinovaSazba: 2000, popis: 'Základ, střední & budgeting a forcasting' },
-    // null znamená cenu dle hodinové sazby.
-    { nazev: 'Individuální', mesicniCena: null, implementace: null, implementaceServer: null, hodinovaSazba: null, popis: 'Konsolidace' }
-  ],
   rekonstrukceUcetnictviHodina: 1150,
   // Každý koeficient přidává základ × (koeficient − 1); přírůstky se sčítají.
   // Základ je součet cen faktur, pokladních dokladů, plateb kartou a položek na bance.

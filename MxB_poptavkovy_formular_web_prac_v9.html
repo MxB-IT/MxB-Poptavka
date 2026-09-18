@@ -31,10 +31,9 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
 .next{background:var(--accent);color:white}.back{background:#eee;color:#4F5A6B}.submit{background:#f2c169;color:#4f5a6b}
 .summary{background:var(--light);padding:15px;border-radius:9px;line-height:1.6}
 .estimate-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}.estimate-table{width:100%;border-collapse:collapse;font-size:13px}.estimate-table th,.estimate-table td{padding:12px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}.estimate-table th:first-child,.estimate-table td:first-child{text-align:left;white-space:normal}.estimate-table thead{background:var(--accent);color:#fff}.estimate-table tfoot{font-weight:700;color:var(--accent);font-size:15px}.estimate-table tfoot td{border-bottom:0}.estimate-table tbody{background:#fff}#estimate .estimate-table tfoot{background:#fff;color:#4F5A6B;font-weight:700}#estimate .estimate-table tfoot td{color:#4F5A6B}
-.reporting-table{min-width:750px;table-layout:fixed;border-collapse:separate;border-spacing:0}.reporting-table-wrap{border:1px solid var(--border);border-radius:10px;overflow-x:auto}.reporting-table th,.reporting-table td{white-space:normal;text-align:center;vertical-align:middle;line-height:1.5}.reporting-table td:first-child{font-weight:700}.reporting-table td:last-child{text-align:left}
 @media(max-width:650px){.grid,.service-grid,.choice-grid{grid-template-columns:1fr}.wrap{padding:15px 10px}.card{padding:20px 16px}h1{font-size:24px}.header-brand{gap:16px}.brand{font-size:15px}}
 #backStep,#skipStep{padding:9px 14px;font-size:13px;margin:0}.nav .back,.nav .next{padding:9px 14px;font-size:13px}#backStep{background:#eee;color:#4F5A6B}.grid .field.rowAligned label{min-height:var(--row-label-height,auto)}
-.test-estimate{background:#eef4fa;border:1px solid #c6d7e9}.test-estimate h2,.test-estimate .estimate-table tfoot{color:#365e85}.test-estimate .estimate-table thead{background:#365e85}#reportingPrices{display:none!important}#estimateNotices .intro{font-size:14px}.step[data-step="6"] .section>h2,.step[data-step="6"] .section>p,.step[data-step="6"] .section>#estimateNotices{margin-left:10px;margin-right:10px}
+.test-estimate{background:#eef4fa;border:1px solid #c6d7e9}.test-estimate h2,.test-estimate .estimate-table tfoot{color:#365e85}.test-estimate .estimate-table thead{background:#365e85}#estimateNotices .intro{font-size:14px}.step[data-step="6"] .section>h2,.step[data-step="6"] .section>p,.step[data-step="6"] .section>#estimateNotices{margin-left:10px;margin-right:10px}
 </style>
 </head>
 <body>
@@ -217,7 +216,6 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
         </table></div>
         <p id="testEstimateStatus" class="hint"></p>
       </div>
-      <div id="reportingPrices" class="section hidden" aria-live="polite"></div>
       <div class="section">
         <h2>Specifika a požadavky na spolupráci</h2>
         <textarea name="Specifika a požadavky na spolupráci"></textarea>
@@ -297,12 +295,6 @@ function updateDynamic(){
 document.querySelectorAll('[data-service]').forEach(x=>x.addEventListener('change',updateDynamic));
 document.querySelectorAll('select[name="Plátce DPH"],select[name="Plátce DPH v zahraničí"],select[name="Podání OSS"]').forEach(x=>x.addEventListener('change',updateDynamic));
 
-function toggleOtherCurrency(){
-  const select=document.getElementById('accountingCurrency');
-  const field=document.getElementById('otherCurrencyField');
-  if(select && field) field.classList.toggle('hidden',select.value!=='jiná');
-}
-
 function alignGridLabels(){
   document.querySelectorAll('.grid').forEach(grid=>{
     const fields=[...grid.querySelectorAll(':scope > .field')];
@@ -359,7 +351,7 @@ function render(){
   document.getElementById('backStep').classList.toggle('hidden',position<=1);
   document.getElementById('skipStep').classList.toggle('hidden',position>=steps.length);
   updateDynamic();
-  if(step===6){ buildSummary(); buildReportingPrices(); calculateEstimate(); }
+  if(step===6){ buildSummary(); calculateEstimate(); }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function clearCurrentStep(){
@@ -370,7 +362,6 @@ function clearCurrentStep(){
     else el.value='';
   });
   updateDynamic();
-  if(typeof toggleOtherCurrency==='function') toggleOtherCurrency();
   alignGridLabels();
 }
 
@@ -395,6 +386,23 @@ function next(){
     if(invalid){
       invalid.focus();
       alert(invalid.validity.valueMissing ? `Pole „${invalid.closest('.field')?.querySelector('label')?.textContent?.trim() || invalid.name}“ je povinné.` : `Pole „${invalid.closest('.field')?.querySelector('label')?.textContent?.trim() || invalid.name}“ obsahuje neplatnou hodnotu.`);
+      return;
+    }
+  }
+  if(step===3){
+    const countFor=name=>Number(String(form.elements.namedItem(name)?.value || '').replace(/\s/g,'')) || 0;
+    const bankName='Počet položek na bance (za měsíc)';
+    const bankItems=countFor(bankName);
+    const previousItems=[
+      'Počet přijatých faktur vč. zálohových (za měsíc)',
+      'Počet vydaných faktur vč. zálohových (za měsíc)',
+      'Počet pokladních dokladů (za měsíc)',
+      'Počet plateb kartou / ostatní závazky (za měsíc)'
+    ].reduce((sum,name)=>sum+countFor(name),0);
+    if(bankItems<previousItems){
+      const bankField=form.elements.namedItem(bankName);
+      bankField.focus();
+      alert('Počet položek na bance musí být větší nebo roven součtu přijatých faktur, vydaných faktur, pokladních dokladů a plateb kartou / ostatních závazků.');
       return;
     }
   }
@@ -457,55 +465,6 @@ async function loadFromAres(){
   }catch(e){
     status.textContent='Údaje z ARES se nepodařilo načíst. Zkontrolujte IČO.';
   }
-}
-
-function buildReportingPrices(){
-  const container=document.getElementById('reportingPrices');
-  container.replaceChildren();
-  const visible=form.elements.namedItem('Zpracování reportů').value==='Ano';
-  container.classList.toggle('hidden',!visible);
-  if(!visible) return;
-  const entries=window.MXB_CENIK?.reporting;
-  const keys=['mesicniCena','implementace','implementaceServer','hodinovaSazba'];
-  if(!Array.isArray(entries) || !entries.length || entries.some(entry=>!entry || typeof entry.nazev!=='string' || typeof entry.popis!=='string' || keys.some(key=>entry[key]!==null && (typeof entry[key]!=='number' || !Number.isFinite(entry[key]) || entry[key]<0)))){
-    container.textContent='Ceník reportingu se nepodařilo načíst. Zkontrolujte soubor cenik.js.';
-    return;
-  }
-  const heading=document.createElement('h2');
-  heading.textContent='Ceny Reporting.cz';
-  container.appendChild(heading);
-  const wrap=document.createElement('div');
-  wrap.className='estimate-table-wrap reporting-table-wrap';
-  const table=document.createElement('table');
-  table.className='estimate-table reporting-table';
-  const thead=document.createElement('thead');
-  const header=document.createElement('tr');
-  ['Název','Měsíční cena','Implementace jednorázově','Implementace na serveru MxB nebo jiný server','Hodinová sazba ITC senior a ekonom','Popis'].forEach(label=>{
-    const cell=document.createElement('th');
-    cell.scope='col';
-    cell.textContent=label;
-    header.appendChild(cell);
-  });
-  thead.appendChild(header);
-  table.appendChild(thead);
-  const tbody=document.createElement('tbody');
-  const money=new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0});
-  entries.forEach(entry=>{
-    const row=document.createElement('tr');
-    [entry.nazev,...keys.map(key=>entry[key]===null ? 'Dle hodinové sazby' : money.format(entry[key])),entry.popis].forEach(value=>{
-      const cell=document.createElement('td');
-      cell.textContent=value;
-      row.appendChild(cell);
-    });
-    tbody.appendChild(row);
-  });
-  table.appendChild(tbody);
-  wrap.appendChild(table);
-  container.appendChild(wrap);
-  const note=document.createElement('p');
-  note.className='hint';
-  note.textContent='Reporting není zahrnutý v měsíčním součtu. Konkrétní variantu a rozsah implementace upřesníme v nabídce.';
-  container.appendChild(note);
 }
 
 function buildHourlyRates(){
@@ -758,7 +717,6 @@ function submitDemo(){
   }
   // Přepočet zajistí, že e-mail obsahuje ceny podle aktuálních odpovědí.
   calculateEstimate();
-  buildReportingPrices();
   if((has('ucto') || has('mzdy')) && document.getElementById('estimateTotal').textContent==='—'){
     document.getElementById('result').textContent='Před odesláním opravte prosím údaje pro výpočet ceny. Podrobnosti najdete u cenové tabulky.';
     return;
