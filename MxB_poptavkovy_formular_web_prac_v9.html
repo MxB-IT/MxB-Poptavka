@@ -66,7 +66,7 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
           <button type="button" class="next" style="margin-top:8px;padding:9px 14px;font-size:13px" onclick="loadFromAres()">Načíst název společnosti z ARES</button>
           <div id="aresStatus" class="hint"></div>
         </div>
-        <div class="field" style="margin-top:22px"><label>Kontaktní osoba</label><input name="Kontaktní osoba" required></div>
+        <div class="field" style="margin-top:22px"><label>Kontaktní osoba</label><input name="Kontaktní osoba"></div>
         <div class="field" style="grid-column:1"><label>E-mail</label><input name="E-mail" type="email" required></div>
         <div class="field"><label>Telefon</label><input name="Telefon" type="tel"></div>
       </div><div class="nav"><span></span><button type="button" class="next" onclick="next()">Pokračovat</button></div>
@@ -86,7 +86,8 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
           <label class="check"><input type="checkbox" name="Ekonomické poradenství" data-service="eko">Ekonomické poradenství</label>
           <label class="check"><input type="checkbox" name="Právní poradenství, služby advokáta" data-service="prav">Právní poradenství, služby advokáta</label>
           <label class="check"><input type="checkbox" name="Zpracování Intrastat" data-service="intra">Zpracování Intrastat</label>
-          <label class="check"><input type="checkbox" name="Rekonstrukce účetnictví" data-service="rekonstrukce">Rekonstrukce účetnictví / mzdového účetnictví</label>
+          <label class="check"><input type="checkbox" name="Rekonstrukce účetnictví" data-service="rekonstrukce">Rekonstrukce účetnictví</label>
+          <label class="check"><input type="checkbox" name="Rekonstrukce mzdového účetnictví" data-service="rekonstrukceMzdy">Rekonstrukce mzdového účetnictví</label>
       </div>
       <div class="nav"><button type="button" class="back" onclick="back()">Zpět</button><button type="button" class="next" onclick="clearCurrentStep()">Vymazat</button><button type="button" class="next" onclick="next()">Pokračovat</button></div>
     </section>
@@ -330,7 +331,7 @@ function activeSteps(){
   if(selected().length===0) return [1,2,3,4,5,6];
   const reconstruction=has('rekonstrukce');
   const accounting=has('ucto') || reconstruction;
-  const payroll=has('mzdy') || reconstruction;
+  const payroll=has('mzdy') || reconstruction || has('rekonstrukceMzdy');
   const extraServices=has('ucto') || has('mzdy');
   return [1,2,...(accounting?[3]:[]),...(payroll?[4]:[]),...(extraServices?[5]:[]),6];
 }
@@ -386,23 +387,6 @@ function next(){
     if(invalid){
       invalid.focus();
       alert(invalid.validity.valueMissing ? `Pole „${invalid.closest('.field')?.querySelector('label')?.textContent?.trim() || invalid.name}“ je povinné.` : `Pole „${invalid.closest('.field')?.querySelector('label')?.textContent?.trim() || invalid.name}“ obsahuje neplatnou hodnotu.`);
-      return;
-    }
-  }
-  if(step===3){
-    const countFor=name=>Number(String(form.elements.namedItem(name)?.value || '').replace(/\s/g,'')) || 0;
-    const bankName='Počet položek na bance (za měsíc)';
-    const bankItems=countFor(bankName);
-    const previousItems=[
-      'Počet přijatých faktur vč. zálohových (za měsíc)',
-      'Počet vydaných faktur vč. zálohových (za měsíc)',
-      'Počet pokladních dokladů (za měsíc)',
-      'Počet plateb kartou / ostatní závazky (za měsíc)'
-    ].reduce((sum,name)=>sum+countFor(name),0);
-    if(bankItems<previousItems){
-      const bankField=form.elements.namedItem(bankName);
-      bankField.focus();
-      alert('Počet položek na bance musí být větší nebo roven součtu přijatých faktur, vydaných faktur, pokladních dokladů a plateb kartou / ostatních závazků.');
       return;
     }
   }
@@ -698,7 +682,6 @@ form.addEventListener('change',hideEstimates);
 
 function submitDemo(){
   const requiredFields=[
-    ['Kontaktní osoba','Kontaktní osoba'],
     ['IČO','IČO'],
     ['E-mail','E-mail']
   ];
