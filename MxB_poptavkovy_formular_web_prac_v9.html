@@ -19,6 +19,7 @@ h2{font-size:16px;margin:0 0 18px}.intro{color:#4F5A6B;line-height:1.5}
 .grid{display:grid;grid-template-columns:1fr 1fr;column-gap:14px;row-gap:8px}.field{margin-bottom:0}.full{grid-column:1/-1}
 label{display:block;font-size:13px;font-weight:600;margin-bottom:7px}
 .required-mark{color:var(--accent);margin-left:4px;font-weight:800}
+.field-error{color:#a52f2c;font-size:13px;font-weight:600;margin:6px 0 0}.field-error:empty{display:none}input[aria-invalid="true"]{border:2px solid var(--accent);background:#f5f1f1}
 input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:13px;background:#fff}
 textarea{min-height:100px;resize:vertical}.req{color:var(--accent)}
 .service-grid,.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -235,7 +236,7 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
         <div class="grid">
           <div class="field"><label for="contactPerson">Kontaktní osoba</label><input id="contactPerson" name="Kontaktní osoba" autocomplete="name"></div>
           <div class="field"><label for="icoField">IČO</label><input id="icoField" name="IČO" inputmode="numeric"></div>
-          <div class="field"><label for="contactEmail">E-mail <span class="field-help"><span class="help-mark" tabindex="0" aria-label="Vysvětlení použití e-mailu" aria-describedby="contactEmailHelp">?</span><span id="contactEmailHelp" class="help-tooltip" role="tooltip">Slouží pro zaslání poptávky</span></span></label><input id="contactEmail" name="E-mail" type="email" autocomplete="email" required aria-describedby="contactEmailHelp"></div>
+          <div class="field"><label for="contactEmail">E-mail <span class="field-help"><span class="help-mark" tabindex="0" aria-label="Vysvětlení použití e-mailu" aria-describedby="contactEmailHelp">?</span><span id="contactEmailHelp" class="help-tooltip" role="tooltip">Slouží pro zaslání poptávky</span></span></label><input id="contactEmail" name="E-mail" type="email" autocomplete="email" required aria-describedby="contactEmailHelp contactEmailError"><p id="contactEmailError" class="field-error" role="alert"></p></div>
           <div class="field"><label for="contactPhone">Telefon</label><input id="contactPhone" name="Telefon" type="tel" autocomplete="tel"></div>
         </div>
       </div>
@@ -664,13 +665,34 @@ function hideEstimates(event){
 form.addEventListener('input',hideEstimates);
 form.addEventListener('change',hideEstimates);
 
-function submitDemo(){
+function validateContactEmail(){
   const email=form.elements.namedItem('E-mail');
-  if(!email.checkValidity()){
-    step=6;
-    render();
-    email.focus();
-    email.reportValidity();
+  const message=!email.value.trim()
+    ? 'Vyplňte prosím e-mail. Je povinný pro odeslání poptávky.'
+    : !email.validity.valid ? 'Zadejte prosím platný e-mail, například jmeno@firma.cz.' : '';
+  document.getElementById('contactEmailError').textContent=message;
+  if(message) email.setAttribute('aria-invalid','true');
+  else email.removeAttribute('aria-invalid');
+  return !message;
+}
+function focusContactEmail(){
+  if(step!==6){step=6;render();}
+  const email=form.elements.namedItem('E-mail');
+  email.scrollIntoView({block:'center',behavior:'instant'});
+  email.focus({preventScroll:true});
+}
+document.getElementById('contactEmail').addEventListener('input',event=>{
+  if(event.target.getAttribute('aria-invalid')==='true') validateContactEmail();
+});
+document.getElementById('contactEmail').addEventListener('invalid',event=>{
+  event.preventDefault();
+  validateContactEmail();
+  focusContactEmail();
+});
+
+function submitDemo(){
+  if(!validateContactEmail()){
+    focusContactEmail();
     return;
   }
   // Stejnou kontrolu je nutné provést i na budoucím serverovém endpointu.
