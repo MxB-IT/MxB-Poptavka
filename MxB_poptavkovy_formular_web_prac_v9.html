@@ -30,6 +30,8 @@ textarea{min-height:100px;resize:vertical}.req{color:var(--accent)}
 button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
 .next{background:var(--accent);color:white}.back{background:#eee;color:#4F5A6B}.submit{background:#f2c169;color:#4f5a6b}
 .summary{background:var(--light);padding:15px;border-radius:9px;line-height:1.6}
+.package-comparison{margin-top:24px}.package-comparison caption{text-align:left;font-weight:700;padding:0 0 12px}.package-comparison th:not(:first-child),.package-comparison td:not(:first-child){text-align:center}
+.vat-package{margin:0 0 28px;color:#000}.vat-package>h2{text-align:center;color:#000;font-size:26px;line-height:1.3;margin:0 0 28px;font-weight:800}.vat-package-card{max-width:308px;margin:0 auto;padding:24px 24px 32px;border-radius:10px;background:#edf1f3;text-align:center;font-size:16px;line-height:1.4;min-height:380px}.vat-package-card h3{margin:0 0 2px;color:#ac5553;font-size:34px;line-height:1.3;font-weight:800}.vat-package-card .vat-package-price{margin:0 0 26px;color:#ac5553;font-size:22px;font-weight:800}.vat-package-card p{margin:0 0 22px}.vat-package-card p:last-child{margin-bottom:0}.vat-package-note{text-align:right;font-size:14px;font-style:italic;margin:20px 0 0}
 .estimate-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}.estimate-table{width:100%;border-collapse:collapse;font-size:13px}.estimate-table th,.estimate-table td{padding:12px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}.estimate-table th:first-child,.estimate-table td:first-child{text-align:left;white-space:normal}.estimate-table thead{background:var(--accent);color:#fff}.estimate-table tfoot{font-weight:700;color:var(--accent);font-size:15px}.estimate-table tfoot td{border-bottom:0}.estimate-table tbody{background:#fff}#estimate .estimate-table tfoot{background:#fff;color:#4F5A6B;font-weight:700}#estimate .estimate-table tfoot td{color:#4F5A6B}
 @media(max-width:650px){.grid,.service-grid,.choice-grid{grid-template-columns:1fr}.wrap{padding:15px 10px}.card{padding:20px 16px}h1{font-size:24px}.header-brand{gap:16px}.brand{font-size:15px}}
 #backStep,#skipStep{padding:9px 14px;font-size:13px;margin:0}.nav .back,.nav .next{padding:9px 14px;font-size:13px}#backStep{background:#eee;color:#4F5A6B}.grid .field.rowAligned label{min-height:var(--row-label-height,auto)}
@@ -191,7 +193,11 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
 
     <!-- STEP 4 -->
     <section class="step hidden" data-step="6">
-     
+      <div id="vatPackage" class="vat-package hidden" aria-live="polite">
+        <h2>Balíčky pro právnické a fyzické osoby – plátce DPH</h2>
+        <div id="vatPackageCard" class="vat-package-card"></div>
+        <p class="vat-package-note">*Ceny jsou uvedeny bez DPH.</p>
+      </div>
       <div class="summary hidden" id="summary" aria-hidden="true"></div>
       <div id="estimate" class="section hidden" aria-live="polite">
           <h2>Odhadovaná cena za měsíc</h2>
@@ -199,6 +205,13 @@ button{border:0;border-radius:9px;padding:12px 20px;font-family:inherit;font-wei
               <table class="estimate-table">
                   <tbody id="estimateRows"></tbody>
                   <tfoot><tr><td>Celkem za měsíc</td><td id="estimateTotal"></td></tr></tfoot>
+              </table>
+          </div>
+          <div id="packageComparison" class="estimate-table-wrap package-comparison hidden">
+              <table class="estimate-table">
+                  <caption>Porovnání balíčků – ceny za měsíc</caption>
+                  <thead><tr><th scope="col">Služba</th><th scope="col">ZÁKLAD</th><th scope="col">PROFI</th><th scope="col">KOMPLET</th></tr></thead>
+                  <tbody><tr><th scope="row">Zpracování finančního účetnictví</th><td id="accountingZaklad"></td><td id="accountingProfi"></td><td id="accountingKomplet"></td></tr></tbody>
               </table>
           </div>
 
@@ -507,7 +520,7 @@ function buildHourlyRates(){
     container.textContent='Hodinové sazby se nepodařilo načíst. Zkontrolujte soubor cenik.js.';
     return;
   }
-  const money=new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',maximumFractionDigits:0});
+  const money=new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',minimumFractionDigits:0,maximumFractionDigits:2});
   const wrap=document.createElement('div');
   wrap.className='estimate-table-wrap';
   const table=document.createElement('table');
@@ -541,7 +554,26 @@ function buildHourlyRates(){
   container.appendChild(note);
 }
 
+function showVatPackage(documentCount,employeeTotal){
+  const container=document.getElementById('vatPackage');
+  container.classList.add('hidden');
+  if(!has('ucto') || form.elements.namedItem('Plátce DPH').value!=='Ano') return;
+  // Limity jsou včetně hranice, dle „do“ v nabídce. Počty dokladů jsou skutečné, bez banky.
+  const packages=[
+    {name:'XS',documents:10,employees:0,price:'1.500',details:'<p>Zpracování <strong>DPH, KH, SH</strong></p><p>Zpracování <strong>DPFO / DPPO</strong><br>elektronicky do 2.5. následujícího roku</p>'},
+    {name:'S',documents:25,employees:1,price:'3.000',details:'<p>Zpracování mezd<br>do <strong>1 zaměstnance</strong></p><p>Zpracování <strong>DPH, KH, SH</strong></p><p>Zpracování <strong>DPFO / DPPO</strong><br>elektronicky do 2.5. následujícího roku</p>'},
+    {name:'M',documents:50,employees:5,price:'6.000',details:'<p>Zpracování mzdového účetnictví<br>do <strong>5 zaměstnanců</strong></p><p>Zpracování <strong>DPH, KH, SH</strong></p><p>Zpracování <strong>DPFO / DPPO</strong></p><p>Čtvrtletní výstupy z účetnictví</p>'},
+    {name:'L',documents:100,employees:10,price:'10.000',details:'<p>Zpracování mzdového účetnictví<br>do <strong>10 zaměstnanců</strong></p><p>Zpracování DPH, KH, SH</p><p>Zpracování DPFO / DPPO</p><p>Měsíční výstupy z účetnictví</p>'}
+  ];
+  const selected=packages.find(entry=>documentCount<=entry.documents && employeeTotal<=entry.employees);
+  if(!selected) return;
+  document.getElementById('vatPackageCard').innerHTML=`<h3>${selected.name}</h3><p class="vat-package-price">${selected.price} Kč / měsíc*</p><p>Zpracování účetních dokladů<br>do <strong>${selected.documents} ks</strong></p>${selected.details}`;
+  container.classList.remove('hidden');
+}
+
 function calculateEstimate(){
+  document.getElementById('vatPackage').classList.add('hidden');
+  document.getElementById('packageComparison').classList.add('hidden');
   buildHourlyRates();
   if(!has('ucto') && !has('mzdy')) return;
   const prices=window.MXB_CENIK;
@@ -554,13 +586,17 @@ function calculateEstimate(){
   totalCell.textContent='—';
   const totalLabel=totalCell.previousElementSibling;
   totalLabel.textContent='Celkem za měsíc';
-  const priceKeys=['prijateFaktury','vydaneFaktury','pokladniDoklady','platbyKartou','polozkyNaBance','priplatekPlatceDph','koeficientSkladovaEvidence','koeficientStrediskaZakazky','koeficientDetailniAnalytika','obsluhaDatovychSchranek','generalniPlnaMocFu'];
+  const priceKeys=['polozkyNaBance','priplatekPlatceDph','koeficientSkladovaEvidence','koeficientStrediskaZakazky','koeficientDetailniAnalytika','obsluhaDatovychSchranek','generalniPlnaMocFu'];
   if(!prices || priceKeys.some(key=>typeof prices[key]!=='number' || !Number.isFinite(prices[key]) || prices[key]<0) || !Array.isArray(prices.mzdovaPasma) || !prices.mzdovaPasma.length || prices.mzdovaPasma.some((tier,index)=>!tier || !Number.isSafeInteger(tier.doPoctu) || tier.doPoctu<1 || (index>0 && tier.doPoctu<=prices.mzdovaPasma[index-1].doPoctu) || typeof tier.cenaZaZamestnance!=='number' || !Number.isFinite(tier.cenaZaZamestnance) || tier.cenaZaZamestnance<0)){
     status.textContent='Ceník se nepodařilo načíst nebo obsahuje neplatné sazby. Zkontrolujte soubor cenik.js.';
     return;
   }
   if(typeof prices.dppoPocetMesicu!=='number' || !Number.isFinite(prices.dppoPocetMesicu) || prices.dppoPocetMesicu<=0 || typeof prices.dppoNasobek!=='number' || !Number.isFinite(prices.dppoNasobek) || prices.dppoNasobek<0){
     status.textContent='Parametry DPPO v souboru cenik.js nejsou platné.';
+    return;
+  }
+  if(!Array.isArray(prices.dokladovaPasma) || !prices.dokladovaPasma.length || prices.dokladovaPasma.some((tier,index)=>!tier || !Number.isSafeInteger(tier.doPoctu) || tier.doPoctu<1 || (index>0 && tier.doPoctu<=prices.dokladovaPasma[index-1].doPoctu) || ['zaklad','profi','komplet'].some(key=>typeof tier[key]!=='number' || !Number.isFinite(tier[key]) || tier[key]<0))){
+    status.textContent='Dokladová pásma v souboru cenik.js nejsou platná.';
     return;
   }
   const inventoryCoefficient=form.elements.namedItem('Skladová evidence / účtování zásob').value==='Typ A' ? prices.koeficientSkladovaEvidence : 1;
@@ -579,10 +615,10 @@ function calculateEstimate(){
   const costCenterCoefficient=form.elements.namedItem('Účtujete na střediska / zakázky?').value==='Ano' ? prices.koeficientStrediskaZakazky : 1;
   const analyticsCoefficient=form.elements.namedItem('Sledujete detailní analytiku?').value==='Ano' ? prices.koeficientDetailniAnalytika : 1;
   const baseItems=[
-    ['Počet přijatých faktur','Počet přijatých faktur vč. zálohových (za měsíc)',prices.prijateFaktury],
-    ['Počet vydaných faktur','Počet vydaných faktur vč. zálohových (za měsíc)',prices.vydaneFaktury],
-    ['Počet pokladních dokladů','Počet pokladních dokladů (za měsíc)',prices.pokladniDoklady],
-    ['Počet plateb kartou / ostatní závazky','Počet plateb kartou / ostatní závazky (za měsíc)',prices.platbyKartou],
+    ['Počet přijatých faktur','Počet přijatých faktur vč. zálohových (za měsíc)'],
+    ['Počet vydaných faktur','Počet vydaných faktur vč. zálohových (za měsíc)'],
+    ['Počet pokladních dokladů','Počet pokladních dokladů (za měsíc)'],
+    ['Počet plateb kartou / ostatní závazky','Počet plateb kartou / ostatní závazky (za měsíc)'],
     ['Počet položek na bance','Počet položek na bance (za měsíc)',prices.polozkyNaBance]
   ];
   const counts=baseItems.map(([,name])=>{
@@ -606,60 +642,78 @@ function calculateEstimate(){
   const individualPayroll=!payrollTier;
   const payrollRate=payrollTier ? payrollTier.cenaZaZamestnance : 0;
   const payrollCost=employeeTotal*payrollRate;
-  const extraServices=[
-    ['Obsluha datových schránek',prices.obsluhaDatovychSchranek],
-    ['Generální plná moc pro zastupování před FÚ',prices.generalniPlnaMocFu]
-  ].filter(([name])=>has('ucto') && form.elements.namedItem(name).value==='Ano');
-  const extraCost=extraServices.reduce((sum,[,rate])=>sum+rate,0);
-  const baseDocumentCost=counts.reduce((sum,count,index)=>sum+count*baseItems[index][2],0);
+  const documentCount=counts.slice(0,4).reduce((sum,count)=>sum+count,0);
+  const billedDocumentCount=Math.ceil(documentCount/50)*50;
+  if(counts.some(count=>!Number.isSafeInteger(count)) || !Number.isSafeInteger(billedDocumentCount)){
+    status.textContent='Zadejte prosím platné nezáporné celé počty dokladů a plateb ve třetím kroku.';
+    return;
+  }
+  // Nad 1 000 dokladů platí poslední sazba z tabulky.
+  const documentTier=prices.dokladovaPasma.find(tier=>billedDocumentCount<=tier.doPoctu) || prices.dokladovaPasma[prices.dokladovaPasma.length-1];
+  const bankCost=counts[4]*prices.polozkyNaBance;
+  const baseDocumentCost=billedDocumentCount*documentTier.profi+bankCost;
   const coefficientIncreases=[
     ['Sklady A',inventoryCoefficient],
     ['zakázky/střediska',costCenterCoefficient],
     ['Analytika',analyticsCoefficient],
     ['Obrat',turnoverCoefficient]
-  ].map(([label,coefficient])=>[label,Math.round(baseDocumentCost*(coefficient-1)*100)/100,coefficient]);
+  ].map(([label,coefficient])=>[label,baseDocumentCost*(coefficient-1),coefficient]);
   const documentCost=baseDocumentCost+coefficientIncreases.reduce((sum,[,increase])=>sum+increase,0);
-  const dppoCost=Math.round(baseDocumentCost*prices.dppoNasobek/prices.dppoPocetMesicu*100)/100;
-  const accountingCost=Math.round((documentCost+dppoCost+vatSurcharge)*100)/100;
+  const dppoCost=baseDocumentCost*prices.dppoNasobek/prices.dppoPocetMesicu;
+  const accountingCost=documentCost+dppoCost+vatSurcharge;
+  const accountingVariants={profi:accountingCost};
+  ['zaklad','komplet'].forEach(variant=>{
+    const base=billedDocumentCount*documentTier[variant]+bankCost;
+    accountingVariants[variant]=base+coefficientIncreases.reduce((sum,[,,coefficient])=>sum+base*(coefficient-1),0)+base*prices.dppoNasobek/prices.dppoPocetMesicu+vatSurcharge;
+  });
+  const freePowerOfAttorney=accountingCost+payrollCost>=20000;
+  const extraServices=[
+    ['Obsluha datových schránek',prices.obsluhaDatovychSchranek],
+    ['Generální plná moc pro zastupování před FÚ',prices.generalniPlnaMocFu]
+  ].filter(([name])=>has('ucto') && form.elements.namedItem(name).value==='Ano')
+    .map(([name,rate])=>name==='Generální plná moc pro zastupování před FÚ' && freePowerOfAttorney ? [name+' (zdarma)',0] : [name,rate]);
+  const extraCost=extraServices.reduce((sum,[,rate])=>sum+rate,0);
   if(counts.some(count=>!Number.isFinite(count)) || !Number.isFinite(accountingCost+payrollCost+extraCost) || accountingCost+payrollCost+extraCost>Number.MAX_SAFE_INTEGER){
     status.textContent='Zadejte prosím platné nezáporné celé počty dokladů a plateb ve třetím kroku.';
     return;
   }
-  if(typeof prices.klientZaokrouhleniKrok!=='number' || !Number.isFinite(prices.klientZaokrouhleniKrok) || prices.klientZaokrouhleniKrok<=0){
-    status.textContent='Krok zaokrouhlení v souboru cenik.js není platný.';
-    return;
-  }
-  const roundClient=value=>Math.ceil(value/prices.klientZaokrouhleniKrok)*prices.klientZaokrouhleniKrok;
-  const money=new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',minimumFractionDigits:0,maximumFractionDigits:0});
-  let total=roundClient(accountingCost);
+  const money=new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK',minimumFractionDigits:0,maximumFractionDigits:2});
+  let total=accountingCost;
   if(has('ucto') && accountingCost>0){
     const row=document.createElement('tr');
     const label=document.createElement('td');
     label.textContent='Zpracování finančního účetnictví';
     const amount=document.createElement('td');
-    amount.textContent=money.format(roundClient(accountingCost));
+    amount.textContent=money.format(accountingCost);
     row.append(label,amount);
     rows.appendChild(row);
+  }
+  if(has('ucto')){
+    document.getElementById('accountingZaklad').textContent=money.format(accountingVariants.zaklad);
+    document.getElementById('accountingProfi').textContent=money.format(accountingVariants.profi);
+    document.getElementById('accountingKomplet').textContent=money.format(accountingVariants.komplet);
+    document.getElementById('packageComparison').classList.remove('hidden');
+    showVatPackage(documentCount,employeeTotal);
   }
   if(has('mzdy') && employeeTotal>0){
     const row=document.createElement('tr');
     const label=document.createElement('td');
     label.textContent='Zpracování mzdového účetnictví';
     const amount=document.createElement('td');
-    amount.textContent=individualPayroll ? 'Individuálně' : money.format(roundClient(payrollCost));
+    amount.textContent=individualPayroll ? 'Individuálně' : money.format(payrollCost);
     row.append(label,amount);
     rows.appendChild(row);
   }
-  total+=roundClient(payrollCost);
+  total+=payrollCost;
   extraServices.forEach(([label,rate])=>{
     const row=document.createElement('tr');
-    [label,money.format(roundClient(rate))].forEach(value=>{
+    [label,money.format(rate)].forEach(value=>{
       const cell=document.createElement('td');
       cell.textContent=value;
       row.appendChild(cell);
     });
     rows.appendChild(row);
-    total+=roundClient(rate);
+    total+=rate;
   });
   if(individualPayroll) totalLabel.textContent='Mezisoučet bez mezd za měsíc';
   totalCell.textContent=money.format(total);
@@ -675,9 +729,8 @@ function calculateEstimate(){
     });
     testRows.appendChild(row);
   };
-  baseItems.forEach(([label,,rate],index)=>{
-    if(counts[index]>0) addTestRow([label,counts[index].toLocaleString('cs-CZ'),money.format(rate),money.format(counts[index]*rate)]);
-  });
+  if(billedDocumentCount>0) addTestRow([`Doklady celkem – PROFI (${documentCount.toLocaleString('cs-CZ')} zaokrouhleno nahoru na 50)`,billedDocumentCount.toLocaleString('cs-CZ'),money.format(documentTier.profi),money.format(billedDocumentCount*documentTier.profi)]);
+  if(counts[4]>0) addTestRow(['Počet položek na bance',counts[4].toLocaleString('cs-CZ'),money.format(prices.polozkyNaBance),money.format(bankCost)]);
   coefficientIncreases.forEach(([label,increase,coefficient])=>{
     if(has('ucto') && increase!==0) addTestRow([label,'—',`${money.format(baseDocumentCost)} × (${coefficient.toLocaleString('cs-CZ')} − 1)`,money.format(increase)]);
   });
@@ -694,7 +747,7 @@ function calculateEstimate(){
 }
 function hideEstimates(event){
   if(event?.target?.name==='Specifika a požadavky na spolupráci') return;
-  ['estimate','testEstimate'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  ['estimate','testEstimate','vatPackage'].forEach(id=>document.getElementById(id).classList.add('hidden'));
 }
 form.addEventListener('input',hideEstimates);
 form.addEventListener('change',hideEstimates);
@@ -731,6 +784,7 @@ function submitDemo(){
     if(section.classList.contains('hidden')) return;
     lines.push('');
     [...section.children].forEach(element=>{
+      if(element.classList.contains('hidden')) return;
       const table=element.querySelector('table');
       if(table){
         [...table.rows].forEach(row=>{

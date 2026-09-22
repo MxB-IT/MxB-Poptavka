@@ -1,12 +1,30 @@
 // Ukázkové jednotkové ceny a měsíční příplatky v Kč bez DPH.
 window.MXB_CENIK = {
-  verze: 'ukazka-1',
-  // Každý cenový řádek klientské tabulky se zaokrouhlí nahoru na tento násobek Kč.
-  klientZaokrouhleniKrok: 50,
-  prijateFaktury: 35,
-  vydaneFaktury: 35,
-  pokladniDoklady: 35,
-  platbyKartou: 35,
+  verze: 'doklady-2026-09',
+  // Zdroj: doklady.xlsx, List1!A4:G22. Součet čtyř druhů dokladů
+  // zaokrouhlujeme nahoru na 50; celé množství se násobí sazbou pásma.
+  // Banka se účtuje podle skutečného počtu, mimo pásma dokladů.
+  dokladovaPasma: [
+    { doPoctu: 100, zaklad: 35, profi: 50, komplet: 65 },
+    { doPoctu: 150, zaklad: 35, profi: 50, komplet: 65 },
+    { doPoctu: 200, zaklad: 35, profi: 50, komplet: 65 },
+    { doPoctu: 250, zaklad: 35, profi: 50, komplet: 65 },
+    { doPoctu: 300, zaklad: 31, profi: 44, komplet: 58 },
+    { doPoctu: 350, zaklad: 28, profi: 40, komplet: 53 },
+    { doPoctu: 400, zaklad: 26, profi: 37, komplet: 49 },
+    { doPoctu: 450, zaklad: 24, profi: 35, komplet: 46 },
+    { doPoctu: 500, zaklad: 23, profi: 33, komplet: 44 },
+    { doPoctu: 550, zaklad: 21, profi: 32, komplet: 42 },
+    { doPoctu: 600, zaklad: 20, profi: 31, komplet: 41 },
+    { doPoctu: 650, zaklad: 20, profi: 29, komplet: 39 },
+    { doPoctu: 700, zaklad: 19, profi: 29, komplet: 38 },
+    { doPoctu: 750, zaklad: 18, profi: 28, komplet: 37 },
+    { doPoctu: 800, zaklad: 18, profi: 27, komplet: 36 },
+    { doPoctu: 850, zaklad: 17, profi: 26, komplet: 36 },
+    { doPoctu: 900, zaklad: 17, profi: 26, komplet: 35 },
+    { doPoctu: 950, zaklad: 17, profi: 25, komplet: 34 },
+    { doPoctu: 1000, zaklad: 16, profi: 25, komplet: 34 }
+  ],
   polozkyNaBance: 10,
   // Měsíční složka DPPO = (součet základních cen pěti účetních položek × násobek) / počet měsíců.
   // Přírůstky koeficientů se do základu DPPO nezahrnují.
@@ -41,12 +59,15 @@ window.MXB_CENIK = {
   // Obratová pásma a koeficienty cen dokladů podle převládající činnosti.
   obratovaPasma: {
     zbozi: [
-      { popis: 'do 150 mil. Kč', koeficient: 1 },
+        { popis: 'do 50 mil. Kč', koeficient: 1 },
+        { popis: '50 - 100 mil. Kč', koeficient: 1 },
+      { popis: '100 - 150 mil. Kč', koeficient: 1 },
       { popis: '150 – 500 mil. Kč', koeficient: 1.2 },
       { popis: 'nad 500 mil. Kč', koeficient: 1.4 }
     ],
     sluzby: [
-      { popis: 'do 50 mil. Kč', koeficient: 1 },
+      { popis: 'do 10 mil. Kč', koeficient: 1 },
+      { popis: '10 - 50 mil. Kč', koeficient: 1 },
       { popis: '50 – 100 mil. Kč', koeficient: 1.2 },
       { popis: 'nad 100 mil. Kč', koeficient: 1.4 }
     ],
