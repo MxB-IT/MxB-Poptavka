@@ -32,8 +32,6 @@ window.MXB_CENIK = {
   dppoNasobek: 1.5,
   // Pevný příplatek, na který se žádné koeficienty nevztahují.
   priplatekPlatceDph: 1000,
-  obsluhaDatovychSchranek: 500,
-  generalniPlnaMocFu: 750,
   // Hodinové sazby v Kč bez DPH; minimum je za celé daňové přiznání.
   danovePoradenstviHodina: 2500,
   seniorUcetniHodina: 900,
@@ -45,8 +43,6 @@ window.MXB_CENIK = {
   pravniPoradenstviHodina: 2000,
   sluzbyAdvokataHodina: 2800,
   intrastatHodina: 900,
-  // Společná hodinová sazba pro zahraniční DPH a podání OSS.
-  zahranicniDphOssHodina: 900,
   rekonstrukceUcetnictviHodina: 1150,
   // Každý koeficient přidává základ × (koeficient − 1); přírůstky se sčítají.
   // Základ je součet cen faktur, pokladních dokladů, plateb kartou a položek na bance.
@@ -85,6 +81,8 @@ window.MXB_CENIK = {
   mzdovaPasma: [
     { doPoctu: 2, cenaZaZamestnance: 500 },
     { doPoctu: 50, cenaZaZamestnance: 350 },
-    { doPoctu: 200, cenaZaZamestnance: 300 }
+    { doPoctu: 100, cenaZaZamestnance: 300 },
+    { doPoctu: 200, cenaZaZamestnance: 275 },
+    { doPoctu: 5000, cenaZaZamestnance: 250 }
   ]
 };
