@@ -32,6 +32,9 @@ window.MXB_CENIK = {
   dppoNasobek: 1.5,
   // Pevný příplatek, na který se žádné koeficienty nevztahují.
   priplatekPlatceDph: 1000,
+  // Doplňkové služby: pevné měsíční příplatky pouze pro Základní a Pokročilý.
+  generalniPlnaMocFu: 750,
+  obsluhaDatovychSchranek: 500,
   // Hodinové sazby v Kč bez DPH; minimum je za celé daňové přiznání.
   danovePoradenstviHodina: 2500,
   seniorUcetniHodina: 900,
