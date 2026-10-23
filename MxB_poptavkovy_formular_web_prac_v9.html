@@ -1325,12 +1325,14 @@ function calculateEstimate(){
           const documentTier=prices.dokladovaPasma.find(tier=>billedDocumentCount<=tier.doPoctu) || prices.dokladovaPasma[prices.dokladovaPasma.length-1];
           const bankCost=counts[4]*prices.polozkyNaBance;
           const baseDocumentCost=billedDocumentCount*documentTier.profi+bankCost;
+  // Střediska / zakázky se připlácejí pouze v Základním tarifu.
+  const tariffCoefficient=(label,coefficient,variant)=>label==='zakázky/střediska' && variant!=='zaklad' ? 1 : coefficient;
           const coefficientIncreases=[
             ['Sklady A',inventoryCoefficient],
             ['zakázky/střediska',costCenterCoefficient],
             ['Analytika',analyticsCoefficient],
             ['Obrat',turnoverCoefficient]
-          ].map(([label,coefficient])=>[label,baseDocumentCost*(coefficient-1),coefficient]);
+          ].map(([label,coefficient])=>[label,baseDocumentCost*(tariffCoefficient(label,coefficient,'profi')-1),coefficient]);
           const documentCost=baseDocumentCost+coefficientIncreases.reduce((sum,[,increase])=>sum+increase,0);
           const dppoCost=baseDocumentCost*prices.dppoNasobek/prices.dppoPocetMesicu;
           const extras=has('ucto') ? [
@@ -1342,7 +1344,7 @@ function calculateEstimate(){
           const accountingVariants={profi:accountingCost};
           ['zaklad','komplet'].forEach(variant=>{
             const base=billedDocumentCount*documentTier[variant]+bankCost;
-            accountingVariants[variant]=base+coefficientIncreases.reduce((sum,[,,coefficient])=>sum+base*(coefficient-1),0)+base*prices.dppoNasobek/prices.dppoPocetMesicu+vatSurcharge+(variant==='zaklad' ? extrasTotal : 0)+importCost(variant);
+            accountingVariants[variant]=base+coefficientIncreases.reduce((sum,[label,,coefficient])=>sum+base*(tariffCoefficient(label,coefficient,variant)-1),0)+base*prices.dppoNasobek/prices.dppoPocetMesicu+vatSurcharge+(variant==='zaklad' ? extrasTotal : 0)+importCost(variant);
           });
           if(counts.some(count=>!Number.isFinite(count)) || Object.values(accountingVariants).some(cost=>!Number.isFinite(cost+payrollCost) || cost+payrollCost>Number.MAX_SAFE_INTEGER)){
             status.textContent='Zadejte prosím platné nezáporné celé počty dokladů a plateb ve třetím kroku.';
@@ -1376,8 +1378,9 @@ function calculateEstimate(){
           if(billedDocumentCount>0) addTestRow([`Doklady celkem – ${label} (${documentCount.toLocaleString('cs-CZ')} zaokrouhleno nahoru na 50)`,billedDocumentCount.toLocaleString('cs-CZ'),`${billedDocumentCount.toLocaleString('cs-CZ')} × ${money.format(documentTier[variant])}`,money.format(billedDocumentCount*documentTier[variant])]);
           if(counts[4]>0) addTestRow(['Počet položek na bance',counts[4].toLocaleString('cs-CZ'),`${counts[4].toLocaleString('cs-CZ')} × ${money.format(prices.polozkyNaBance)}`,money.format(bankCost)]);
           coefficientIncreases.forEach(([label,,coefficient])=>{
-            const increase=variantBase*(coefficient-1);
-            if(has('ucto')) addTestRow([label,'—',`${money.format(variantBase)} × (${coefficient.toLocaleString('cs-CZ')} − 1)`,money.format(increase)]);
+            const effectiveCoefficient=tariffCoefficient(label,coefficient,variant);
+            const increase=variantBase*(effectiveCoefficient-1);
+            if(has('ucto')) addTestRow([label,'—',label==='zakázky/střediska' && variant!=='zaklad' ? 'Zahrnuto v tarifu' : `${money.format(variantBase)} × (${effectiveCoefficient.toLocaleString('cs-CZ')} − 1)`,money.format(increase)]);
           });
           if(has('ucto') && variantDppo>0) addTestRow(['DPPO – měsíční složka','—',`(${money.format(variantBase)} × ${prices.dppoNasobek.toLocaleString('cs-CZ')}) / ${prices.dppoPocetMesicu}`,money.format(variantDppo)]);
           if(has('ucto') && form.elements.namedItem('Plátce DPH').value==='Ano') addTestRow(['Příplatek – plátce DPH','1',money.format(vatSurcharge),money.format(vatSurcharge)]);
