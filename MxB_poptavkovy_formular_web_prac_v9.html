@@ -907,6 +907,12 @@
 
                 <div class="nav"><button type="button" class="back" onclick="back()">Zpět</button><button type="button" class="submit" onclick="submitInquiry()">Odeslat poptávku</button></div>
                 <p id="result" class="hint" role="status" aria-live="polite"></p>
+                <div id="emailPreview" class="section hidden">
+                    <h2>Náhled e-mailu</h2>
+                    <p id="emailPreviewSubject"></p>
+                    <label for="emailPreviewBody">Celý text připraveného e-mailu</label>
+                    <textarea id="emailPreviewBody" rows="24" readonly></textarea>
+                </div>
             </section>
         </form>
     </div>
@@ -1434,8 +1440,7 @@ function buildEmailPrices(){
           return lines;
 }
 
-async function submitInquiry(){
-          if(inquirySending) return;
+function submitInquiry(){
           updatePayrollRequirements();
           const payrollInvalid=activeSteps().includes(4) && [...document.querySelectorAll('.step[data-step="4"] input')].find(field=>!field.checkValidity());
           if(payrollInvalid){step=4;render();payrollInvalid.reportValidity();return;}
@@ -1459,41 +1464,21 @@ async function submitInquiry(){
             return;
           }
           const fd=new FormData(form);
-          const fields=[];
-          const lines=[];
+          const lines=['POPTÁVKA SLUŽEB MxB účto','','ÚDAJE Z POPTÁVKOVÉHO FORMULÁŘE'];
           for(const [name,value] of fd.entries()){
             if(name==='website' || !value) continue;
-            fields.push({name,value:String(value)});
-            lines.push(name+': '+value);
+            const control=form.elements.namedItem(name);
+            const displayValue=control?.tagName==='SELECT' ? (control.options[control.selectedIndex]?.text || value) : value;
+            lines.push(name+': '+displayValue);
           }
           lines.push(...buildEmailPrices());
           const result=document.getElementById('result');
-          if(!INQUIRY_EMAIL_CONFIG.endpoint.trim()){
-            result.textContent='Odesílání poptávek zatím není dostupné. Zkuste to prosím později.';
-            return;
-          }
-          const button=form.querySelector('button.submit');
-          const originalText=button.textContent;
-          inquirySending=true;
-          button.disabled=true;
-          button.textContent='Odesílám…';
-          result.textContent='Probíhá odesílání poptávky…';
-          try{
-            await sendInquiryEmail({
-              subject:INQUIRY_EMAIL_CONFIG.subject,
-              replyTo:form.elements.namedItem('E-mail').value.trim(),
-              fields,
-              body:lines.join('\n'),
-              website:fd.get('website') || ''
-            });
-            result.textContent='Děkujeme, vaše poptávka byla úspěšně odeslána.';
-          }catch(error){
-            result.textContent='Odeslání se nepodařilo potvrdit. Zkuste to prosím později.';
-          }finally{
-            inquirySending=false;
-            button.disabled=false;
-            button.textContent=originalText;
-          }
+          const subject=INQUIRY_EMAIL_CONFIG.subject;
+          const body=lines.join('\r\n');
+          document.getElementById('emailPreviewSubject').textContent='Předmět: '+subject;
+          document.getElementById('emailPreviewBody').value=body;
+          document.getElementById('emailPreview').classList.remove('hidden');
+          result.textContent='Náhled poptávky je připraven níže. Jde o testovací náhled, poptávka nebyla odeslána.';
 }
 form.addEventListener('submit',event=>{
           event.preventDefault();
@@ -1502,46 +1487,8 @@ form.addEventListener('submit',event=>{
 render();
 alignGridLabels();
 
-// ============================================================================
-// NASTAVENÍ ODESÍLÁNÍ POPTÁVEK – PRO WEBAŘE
-// ============================================================================
-// 1. Doplňte URL serverového endpointu níže, např. '/api/poptavka'.
-// 2. Na SERVERU nastavte mailový profil (SMTP / mailová služba), odesílatele
-//    a příjemce poptávek (např. info@mxb.cz).
-// 3. Endpoint přijímá POST s JSON: {subject, replyTo, fields, body, website}.
-//    fields je seznam {name, value}; body obsahuje všechny vyplněné údaje
-//    a případný cenový souhrn v prostém textu. replyTo je e-mail zájemce.
-// 4. Server musí ověřit údaje, honeypot website, omezit spam a zabránit
-//    vložení hlaviček e-mailu. Příjemce a odesílatele určuje serverový profil.
-// 5. Teprve po úspěšném předání mailové službě vraťte HTTP 2xx a JSON
-//    {"success":true}. Při chybě vraťte odpovídající HTTP chybu.
-//    Pro jiný formát API upravte pouze funkci sendInquiryEmail níže.
-//    Endpoint na jiné doméně vyžaduje odpovídající nastavení CORS.
-const INQUIRY_EMAIL_CONFIG={
-          endpoint:'', // WEBAŘI DOPLNÍ URL ENDPOINTU PRO ODESÍLÁNÍ
-          subject:'Poptávka služeb MxB účto',
-          timeoutMs:30000
-};
-let inquirySending=false;
-
-async function sendInquiryEmail(payload){
-          const controller=new AbortController();
-          const timeout=setTimeout(()=>controller.abort(),INQUIRY_EMAIL_CONFIG.timeoutMs);
-          try{
-            const response=await fetch(INQUIRY_EMAIL_CONFIG.endpoint,{
-              method:'POST',
-              headers:{'Content-Type':'application/json','Accept':'application/json'},
-              credentials:'same-origin',
-              body:JSON.stringify(payload),
-              signal:controller.signal
-            });
-            if(!response.ok) throw new Error('Odesílací endpoint vrátil chybu.');
-            const confirmation=await response.json();
-            if(confirmation.success!==true) throw new Error('Server nepotvrdil odeslání.');
-          }finally{
-            clearTimeout(timeout);
-          }
-}
+// Testovací verze: zobrazí náhled e-mailu přímo ve formuláři.
+const INQUIRY_EMAIL_CONFIG={subject:'Poptávka služeb MxB účto'};
     </script>
 </body>
 </html>
